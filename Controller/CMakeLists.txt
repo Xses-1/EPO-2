@@ -3,4 +3,4 @@ project(EPO2 C)
 
 set(CMAKE_C_STANDARD 11)
 
-add_executable(EPO2 main.c)
+add_executable(EPO2 main.c Serial/platform.h)
