@@ -4,8 +4,17 @@
 \usepackage{soul}
 \usepackage{biblatex}
 \addbibresource{report.bib}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{soul}
+\usepackage{biblatex}
+\addbibresource{report.bib}
+\usepackage{graphicx}
+\graphicspath{ {./images/} }
+\usepackage{tikz}
 
 \usepackage{changes}
+\usepackage{makecell}
 \begin{document}
 
 %% Use Roman numerals for the page numbers of the title pages and table of
@@ -34,14 +43,35 @@
 %\makecover
 
 %% Uncomment following 16 lines for a cover with a picture on the lower half only
-\title[tudelft-white]{\Huge{EE1L21 EPO 2 Project Plan}}
+\title[tudelft-white]{\Huge{EPO-2 Project Plan A1$\_$1}}
 \subtitle[tudelft-black]{}
 
-\author[tudelft-white]{\Large{Team Members: Chantal Chen, Thijs van Esch, Eojin Lim, Pieter Olyslaegers, Kevin Pang, Darren van de Pol, Wilson Rong, Maximiliaan Sobry, Wiktor Tomanek\\
-Supervisor / Dr. ir. Arjan van Genderen \\
-TA names Nassim Beladel, Ian van Ingen, Daniel Paassen \\
-Electrical Engineering Bsc\\
-03-05-2023\\}}
+\author[tudelft-white]{\Large{
+Chantal Chen \\ 
+Thijs van Esch \\ 
+Eojin Lim \\ 
+Pieter Olyslaegers \\
+Kevin Pang \\ 
+Darren van de Pol \\
+Wilson Rong \\ 
+Maximiliaan Sobry \\ 
+Wiktor Tomanek \\ \\
+Supervisor: Dr. ir. Arjan van Genderen \\
+TA: Nassim Beladel, Ian van Ingen, Daniel Paassen \\ \\
+Electrical Engineering BSc\\
+May 3, 2023\\}}
+
+%
+% ^ This is what I (Thijs) think looks better
+%
+% This is what used to be here:
+%
+
+% \author[tudelft-white]{\Large{Team Members: Chantal Chen, Thijs van Esch, Eojin Lim, Pieter Olyslaegers, Kevin Pang, Darren van de Pol, Wilson Rong, Maximiliaan Sobry, Wiktor Tomanek\\
+% Supervisor: Dr. ir. Arjan van Genderen \\
+% TA: Nassim Beladel, Ian van Ingen, Daniel Paassen \\
+% Electrical Engineering BSc\\
+% 03-05-2023\\}}
   
  
 \affiliation{Technische Universiteit Delft}
@@ -69,22 +99,21 @@ Electrical Engineering Bsc\\
 %% Use Arabic numerals for the page numbers of the chapters.
 \mainmatter
 
-\input{chapter-0}
 \input{chapter-1}
 \input{chapter-2}
 \input{chapter-3}
 \input{chapter-4}
 \input{chapter-5}
 \input{chapter-6}
-\input{chapter-7}
 
+\printbibliography
 
 %% Use letters for the chapter numbers of the appendices.
 \appendix
 
 %\input{appendix-a}
 
-\printbibliography
+
 
 \end{document}
 
