@@ -7,28 +7,121 @@
 
 #if WINDOWS
 
+#include <stdio.h>
+
+#include <Windows.h>
+
+
 //
 // The Windows implementation of the functions declared in serial/serial.h
 //  are defined below.
 //
 
+//
+// The Windows-specific code in this file is adapted from appendix B.2 of
+//  the project manual.
+//
+
+HANDLE hSerial = NULL;
+
+int setTimeouts()
+{
+	COMMTIMEOUTS timeouts = {0};
+	timeouts.ReadIntervalTimeout = 50;
+	timeouts.ReadTotalTimeoutConstant = 50;
+	timeouts.ReadTotalTimeoutMultiplier = 10;
+	timeouts.WriteTotalTimeoutConstant = 50;
+	timeouts.WriteTotalTimeoutMultiplier = 10;
+	if (!SetCommTimeouts(hSerial, &timeouts))
+	{
+		printf("error setting COM timeouts\n");
+		return -15;
+	}
+	return 0;
+}
+
+int setState()
+{
+	DCB params = {0};
+	params.DCBlength = sizeof(params);
+	if (!GetCommState(hSerial, &params))
+	{
+		printf("error getting state\n");
+		return -13;
+	}
+	params.BaudRate = BAUD;
+	params.ByteSize = BYTESIZE;
+	params.StopBits = STOPBITS;
+	params.Parity = PARITY;
+	if (!SetCommState(hSerial, &params))
+	{
+		printf("error setting state\n");
+		return -14;
+	}
+	return 0;
+}
+
+int initWindowsSio()
+{
+	int error = setState();
+	if (error)
+	{
+		return error;
+	}
+	return setTimeouts();
+}
+
 int initSio()
 {
-	return 0;
+	if (hSerial)
+	{
+		/* if the interface has already been initialized
+		    -> return */
+		return 0;
+	}
+	hSerial = (HANDLE *) malloc(sizeof(HANDLE));
+	hSerial = CreateFile(PORT, GENERIC_READ | GENERIC_WRITE, 0, 0,
+			     OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
+	if (hSerial == INVALID_HANDLE_VALUE)
+	{
+		DWORD error = GetLastError();
+		if (error == ERROR_FILE_NOT_FOUND)
+		{
+			printf("unknown COM port: %s\n", PORT);
+			return -12;
+		}
+		printf("unknown error opening %s: code %lu\n", PORT, error);
+		return -11;
+	}
+	return initWindowsSio();
 }
 
 int readData(uint8_t *data, size_t bytes)
 {
-	return 0;
+	if (hSerial == NULL)
+	{
+		/* attempting to read before interface initialization
+		    -> return error code -11 */
+		return -11;
+	}
+	return !ReadFile(hSerial, data, bytes, NULL, NULL);
 }
 
 int writeData(const uint8_t *data, size_t bytes)
 {
-	return 0;
+	if (hSerial == NULL)
+	{
+		/* attempting to write before interface initialization
+		    -> return error code -13 */
+		return -13;
+	}
+	return !WriteFile(hSerial, data, bytes, NULL, NULL);
 }
 
 int closeSio()
 {
+	CloseHandle(hSerial);
+	hSerial = NULL;
 	return 0;
 }
 
