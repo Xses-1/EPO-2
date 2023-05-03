@@ -15,5 +15,6 @@ int main(int argc, char **argv)
 	{
 		return error;
 	}
+	printArguments(args);
 	return 0;
 }

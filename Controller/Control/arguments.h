@@ -41,4 +41,9 @@ typedef struct PROGRAM_ARGS PROGRAM_ARGS;
  */
 int parseArguments(int argc, char **argv, PROGRAM_ARGS *args);
 
+/**
+ * Prints the values contained within the given `PROGRAM_ARGS` struct.
+ */
+void printArguments(const PROGRAM_ARGS *args);
+
 #endif//EPO2_ARGUMENTS_H

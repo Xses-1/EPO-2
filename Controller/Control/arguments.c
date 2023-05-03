@@ -48,3 +48,14 @@ int parseArguments(int argc, char **argv, PROGRAM_ARGS *args)
 	}
 	return 0;
 }
+
+void printArguments(const PROGRAM_ARGS *args)
+{
+	printf("start:\t%d\n", args->start);
+	for (int i = 0; i < args->n; ++i)
+	{
+		uint8_t station = *(args->stations + i);
+		printf("st. %d:\t%d\n", i, station);
+	}
+	printf("\n");
+}
