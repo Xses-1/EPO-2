@@ -16,7 +16,7 @@ typedef struct QueueNode QueueNode;
 
 struct NodeData
 {
-	Location *location;
+	Location location;
 	int cellValue;
 };
 
