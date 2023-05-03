@@ -39,6 +39,6 @@ typedef struct PROGRAM_ARGS PROGRAM_ARGS;
  * valid data. If this is the case, an error message will be printed by this
  * function.
  */
-int parseArguments(int argc, const char *argv[], PROGRAM_ARGS *args);
+int parseArguments(int argc, char **argv, PROGRAM_ARGS *args);
 
 #endif//EPO2_ARGUMENTS_H
