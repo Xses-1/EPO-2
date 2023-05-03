@@ -7,6 +7,12 @@
 
 typedef int **Board;
 
+struct Location
+{
+	int row;
+	int col;
+};
 
+typedef struct Location Location;
 
 #endif//EPO2_TYPES_H
