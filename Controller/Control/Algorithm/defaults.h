@@ -15,4 +15,12 @@
  */
 Board *getDefaultBoard();
 
+/**
+ * Returns the location for the given station. This location is determined
+ * from the given station identifier, which must be in the range [1, 12].
+ * If a value is given that is not in this range, an error will be printed
+ * to the console.
+ */
+Location getStationLocation(int station);
+
 #endif//EPO2_DEFAULTS_H

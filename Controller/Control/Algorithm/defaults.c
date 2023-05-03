@@ -3,6 +3,7 @@
 //
 
 #include <stdlib.h>
+#include <stdio.h>
 
 #include "defaults.h"
 
@@ -33,4 +34,16 @@ Board *getDefaultBoard()
 		}
 	}
 	return board;
+}
+
+Location getStationLocation(int station)
+{
+	if (station < 1 || station > 12)
+	{
+		printf("illicit station identifier: %d\n", station);
+	}
+	int rows[12] = {12, 12, 12, 8, 6, 4, 0, 0, 0, 4, 6, 8};
+	int cols[12] = {4, 6, 8, 12, 12, 12, 8, 6, 4, 0, 0, 0};
+	Location stationLocation = {rows[station - 1], cols[station - 1]};
+	return stationLocation;
 }
