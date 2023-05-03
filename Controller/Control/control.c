@@ -6,11 +6,6 @@
 
 #include "control.h"
 
-int parseArguments(int argc, const char *argv[], PROGRAM_ARGS *args)
-{
-	return 0;
-}
-
 int initControl(PROGRAM_ARGS *args)
 {
 	return 0;

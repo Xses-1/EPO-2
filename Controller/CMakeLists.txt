@@ -12,7 +12,9 @@ add_executable(
         Serial/serial.c
         Control/control.h
         Control/control.c
-        Control/operations.h)
+        Control/operations.h
+        Control/arguments.h
+        Control/arguments.c)
 
 # Tests:
 add_executable(SerialTest Test/serial.c Serial/platform.h Serial/params.h Serial/serial.h Serial/serial.c)
