@@ -6,6 +6,7 @@
 #define EPO2_QUEUE_H
 
 #include <stddef.h>
+#include <stdint.h>
 
 struct QueueNode;
 
@@ -13,7 +14,7 @@ typedef struct QueueNode QueueNode;
 
 struct QueueNode
 {
-	int value;
+	uint64_t value;
 	QueueNode *next;
 };
 
@@ -38,13 +39,13 @@ size_t getQueueLength(const Queue *queue);
 /**
  * Appends the given integer to the given queue.
  */
-void appendToQueue(Queue *queue, int value);
+void appendToQueue(Queue *queue, uint64_t value);
 
 /**
  * Removes the first node from the queue. Its value is returned.
  *
  * If there is no value to take from the queue, INT32_MIN will be returned.
  */
-int takeFromQueue(Queue *queue);
+uint64_t takeFromQueue(Queue *queue);
 
 #endif//EPO2_QUEUE_H
