@@ -23,17 +23,22 @@ const int DEFAULT_BOARD[N_ROWS][N_COLS] = {
 	{-1, -1, -1, -1,  0, -1,  0, -1,  0, -1, -1, -1, -1}
 };
 
-Board *getDefaultBoard()
+Board getDefaultBoard()
 {
-	Board *board = (Board *) malloc(sizeof(Board));
+	int **board = (int **) malloc(sizeof(int *) * N_ROWS);
+	for (int i = 0; i < N_ROWS; ++i)
+	{
+		*(board + i) = (int *) malloc(sizeof(int) * N_COLS);
+	}
+	Board actualBoard = board;
 	for (int i = 0; i < N_ROWS; ++i)
 	{
 		for (int j = 0; j < N_COLS; ++j)
 		{
-			*board[i][j] = DEFAULT_BOARD[i][j];
+			actualBoard[i][j] = DEFAULT_BOARD[i][j];
 		}
 	}
-	return board;
+	return actualBoard;
 }
 
 Location getStationLocation(int station)

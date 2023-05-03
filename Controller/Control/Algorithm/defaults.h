@@ -13,7 +13,7 @@
 /**
  * Returns a newly created board with all default values.
  */
-Board *getDefaultBoard();
+Board getDefaultBoard();
 
 /**
  * Returns the location for the given station. This location is determined
