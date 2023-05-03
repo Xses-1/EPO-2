@@ -14,7 +14,9 @@ add_executable(
         Control/control.c
         Control/operations.h
         Control/arguments.h
-        Control/arguments.c)
+        Control/arguments.c
+        Control/Algorithm/queue.c
+        Control/Algorithm/queue.h)
 
 # Tests:
 add_executable(SerialTest Test/serial.c Serial/platform.h Serial/params.h Serial/serial.h Serial/serial.c)
