@@ -14,9 +14,17 @@ struct QueueNode;
 
 typedef struct QueueNode QueueNode;
 
-struct QueueNode
+struct NodeData
 {
 	Location *location;
+	int cellValue;
+};
+
+typedef struct NodeData NodeData;
+
+struct QueueNode
+{
+	NodeData *data;
 	QueueNode *next;
 };
 
@@ -39,15 +47,15 @@ Queue *createQueue();
 size_t getQueueLength(const Queue *queue);
 
 /**
- * Appends the given location to the given queue.
+ * Appends the given data to the given queue.
  */
-void appendToQueue(Queue *queue, Location *location);
+void appendToQueue(Queue *queue, NodeData *data);
 
 /**
- * Removes the first node from the queue. Its value is returned.
+ * Removes the first node from the queue. Its data is returned.
  *
- * If there is no value to take from the queue, NULL will be returned.
+ * If there is no data to take from the queue, NULL will be returned.
  */
-Location *takeFromQueue(Queue *queue);
+NodeData *takeFromQueue(Queue *queue);
 
 #endif//EPO2_QUEUE_H

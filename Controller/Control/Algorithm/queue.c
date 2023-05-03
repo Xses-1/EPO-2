@@ -26,16 +26,16 @@ size_t getQueueLength(const Queue *queue)
 	return queueLength;
 }
 
-void appendToQueue(Queue *queue, Location *value)
+void appendToQueue(Queue *queue, NodeData *data)
 {
 	QueueNode *newNode = (QueueNode *) malloc(sizeof(QueueNode));
 	newNode->next = NULL;
-	newNode->location = value;
+	newNode->data = data;
 	queue->last->next = newNode;
 	queue->last = newNode;
 }
 
-Location *takeFromQueue(Queue *queue)
+NodeData *takeFromQueue(Queue *queue)
 {
 	if (!getQueueLength(queue))
 	{
@@ -43,7 +43,7 @@ Location *takeFromQueue(Queue *queue)
 	}
 	QueueNode *first = queue->first;
 	queue->first = queue->first->next;
-	Location *location = first->location;
+	NodeData *data = first->data;
 	free(first);
-	return location;
+	return data;
 }
