@@ -19,7 +19,9 @@ add_executable(
         Control/Algorithm/queue.h
         Control/Algorithm/defaults.h
         Control/Algorithm/defaults.c
-        Control/Algorithm/types.h)
+        Control/Algorithm/types.h
+        Control/Algorithm/board.c
+        Control/Algorithm/board.h)
 
 # Tests:
 add_executable(SerialTest Test/serial.c Serial/platform.h Serial/params.h Serial/serial.h Serial/serial.c)
