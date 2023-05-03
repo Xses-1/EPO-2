@@ -31,8 +31,16 @@ void appendToQueue(Queue *queue, NodeData *data)
 	QueueNode *newNode = (QueueNode *) malloc(sizeof(QueueNode));
 	newNode->next = NULL;
 	newNode->data = data;
-	queue->last->next = newNode;
-	queue->last = newNode;
+	size_t length = getQueueLength(queue);
+	if (length == 0)
+	{
+		queue->first = newNode;
+		queue->last = newNode;
+	} else
+	{
+		queue->last->next = newNode;
+		queue->last = newNode;
+	}
 }
 
 NodeData *takeFromQueue(Queue *queue)
