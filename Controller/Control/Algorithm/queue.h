@@ -8,13 +8,15 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#include "types.h"
+
 struct QueueNode;
 
 typedef struct QueueNode QueueNode;
 
 struct QueueNode
 {
-	uint64_t value;
+	Location *location;
 	QueueNode *next;
 };
 
@@ -37,15 +39,15 @@ Queue *createQueue();
 size_t getQueueLength(const Queue *queue);
 
 /**
- * Appends the given integer to the given queue.
+ * Appends the given location to the given queue.
  */
-void appendToQueue(Queue *queue, uint64_t value);
+void appendToQueue(Queue *queue, Location *location);
 
 /**
  * Removes the first node from the queue. Its value is returned.
  *
- * If there is no value to take from the queue, INT32_MIN will be returned.
+ * If there is no value to take from the queue, NULL will be returned.
  */
-uint64_t takeFromQueue(Queue *queue);
+Location *takeFromQueue(Queue *queue);
 
 #endif//EPO2_QUEUE_H

@@ -3,7 +3,6 @@
 //
 
 #include <stdlib.h>
-#include <stdint.h>
 
 #include "queue.h"
 
@@ -27,24 +26,24 @@ size_t getQueueLength(const Queue *queue)
 	return queueLength;
 }
 
-void appendToQueue(Queue *queue, uint64_t value)
+void appendToQueue(Queue *queue, Location *value)
 {
 	QueueNode *newNode = (QueueNode *) malloc(sizeof(QueueNode));
 	newNode->next = NULL;
-	newNode->value = value;
+	newNode->location = value;
 	queue->last->next = newNode;
 	queue->last = newNode;
 }
 
-uint64_t takeFromQueue(Queue *queue)
+Location *takeFromQueue(Queue *queue)
 {
 	if (!getQueueLength(queue))
 	{
-		return INT32_MIN;
+		return NULL;
 	}
 	QueueNode *first = queue->first;
 	queue->first = queue->first->next;
-	uint64_t value = first->value;
+	Location *location = first->location;
 	free(first);
-	return value;
+	return location;
 }
