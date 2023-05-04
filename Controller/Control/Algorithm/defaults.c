@@ -23,32 +23,33 @@ const int DEFAULT_BOARD[N_ROWS][N_COLS] = {
 	{-1, -1, -1, -1,  0, -1,  0, -1,  0, -1, -1, -1, -1}
 };
 
-Board getDefaultBoard()
+const int STATION_ROWS[] =
+	{12, 12, 12, 8, 6, 4, 0, 0, 0, 4, 6, 8};
+const int STATION_COLS[] =
+	{4, 6, 8, 12, 12, 12, 8, 6, 4, 0, 0, 0};
+
+int **getDefaultBoard()
 {
 	int **board = (int **) malloc(sizeof(int *) * N_ROWS);
 	for (int i = 0; i < N_ROWS; ++i)
 	{
-		*(board + i) = (int *) malloc(sizeof(int) * N_COLS);
-	}
-	Board actualBoard = board;
-	for (int i = 0; i < N_ROWS; ++i)
-	{
+		board[i] = (int *) malloc(sizeof(int) * N_COLS);
 		for (int j = 0; j < N_COLS; ++j)
 		{
-			actualBoard[i][j] = DEFAULT_BOARD[i][j];
+			board[i][j] = DEFAULT_BOARD[i][j];
 		}
 	}
-	return actualBoard;
+	return board;
 }
 
-Location getStationLocation(int station)
+void getStationLocation(int station, int *row, int *col)
 {
 	if (station < 1 || station > 12)
 	{
 		printf("illicit station identifier: %d\n", station);
+		return;
 	}
-	int rows[12] = {12, 12, 12, 8, 6, 4, 0, 0, 0, 4, 6, 8};
-	int cols[12] = {4, 6, 8, 12, 12, 12, 8, 6, 4, 0, 0, 0};
-	Location stationLocation = {rows[station - 1], cols[station - 1]};
-	return stationLocation;
+	station -= 1;
+	*row = STATION_ROWS[station];
+	*col = STATION_COLS[station];
 }

@@ -8,19 +8,19 @@
 #define N_ROWS 13
 #define N_COLS 13
 
-#include "types.h"
-
 /**
  * Returns a newly created board with all default values.
  */
-Board getDefaultBoard();
+int **getDefaultBoard();
 
 /**
- * Returns the location for the given station. This location is determined
- * from the given station identifier, which must be in the range [1, 12].
- * If a value is given that is not in this range, an error will be printed
- * to the console.
+ * Writes the location for the given station to the given addresses. This
+ * location is determined from the given station identifier, which must be in
+ * the range [1, 12]. If a value is given that is not in this range, an error
+ * will be printed to the console.
+ *
+ * It is assumed that the function may write to the given addresses.
  */
-Location getStationLocation(int station);
+void getStationLocation(int station, int *row, int *col);
 
 #endif//EPO2_DEFAULTS_H
