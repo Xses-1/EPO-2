@@ -8,8 +8,6 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include "types.h"
-
 struct QueueNode;
 
 typedef struct QueueNode QueueNode;

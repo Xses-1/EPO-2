@@ -19,7 +19,6 @@ add_executable(
         Control/Algorithm/queue.h
         Control/Algorithm/defaults.h
         Control/Algorithm/defaults.c
-        Control/Algorithm/types.h
         Control/Algorithm/board.c
         Control/Algorithm/board.h)
 
@@ -40,7 +39,6 @@ add_executable(
         Control/Algorithm/queue.h
         Control/Algorithm/defaults.h
         Control/Algorithm/defaults.c
-        Control/Algorithm/types.h
         Control/Algorithm/board.c
         Control/Algorithm/board.h)
 
