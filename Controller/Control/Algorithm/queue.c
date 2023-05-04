@@ -2,6 +2,7 @@
 // Created by Thijs J.A. van Esch on 3-5-23.
 //
 
+#include <stdio.h>
 #include <stdlib.h>
 
 #include "queue.h"
@@ -26,11 +27,13 @@ size_t getQueueLength(const Queue *queue)
 	return queueLength;
 }
 
-void appendToQueue(Queue *queue, NodeData *data)
+void appendToQueue(Queue *queue, int row, int col, int dist)
 {
 	QueueNode *newNode = (QueueNode *) malloc(sizeof(QueueNode));
 	newNode->next = NULL;
-	newNode->data = data;
+	newNode->row = row;
+	newNode->col = col;
+	newNode->dist = dist;
 	size_t length = getQueueLength(queue);
 	if (length == 0)
 	{
@@ -43,15 +46,46 @@ void appendToQueue(Queue *queue, NodeData *data)
 	}
 }
 
-NodeData *takeFromQueue(Queue *queue)
+/**
+ * Writes VALUE to ADDRESS if and only if ADDRESS does not equal NULL.
+ */
+void writeValue(int *address, int value)
+{
+	if (address != NULL)
+	{
+		*address = value;
+	}
+}
+
+void takeFromQueue(Queue *queue, int *row, int *column, int *distance)
 {
 	if (!getQueueLength(queue))
 	{
-		return NULL;
+		return;
 	}
 	QueueNode *first = queue->first;
 	queue->first = queue->first->next;
-	NodeData *data = first->data;
+	writeValue(row, first->row);
+	writeValue(column, first->col);
+	writeValue(distance, first->dist);
 	free(first);
-	return data;
+}
+
+void printQueue(const Queue *queue)
+{
+	size_t queueLength = getQueueLength(queue);
+	printf("queue length: %zu\n", queueLength);
+	if (queueLength)
+	{
+		printf("index\trow\tcolumn\tdistance\n");
+	}
+	QueueNode *cursor = queue->first;
+	size_t index = 0;
+	while (cursor != NULL)
+	{
+		printf("%zu\t%d\t%d\t%d\n", index, cursor->row,
+		       cursor->col, cursor->dist);
+		index += 1;
+		cursor = cursor->next;
+	}
 }
