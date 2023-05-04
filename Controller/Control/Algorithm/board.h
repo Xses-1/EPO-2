@@ -21,6 +21,6 @@ int calculatePath(int **board,
 /**
  * Prints the given board to the console.
  */
-void printBoard(const int **board);
+void printBoard(int **board);
 
 #endif//EPO2_BOARD_H

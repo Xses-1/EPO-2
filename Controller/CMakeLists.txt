@@ -23,6 +23,27 @@ add_executable(
         Control/Algorithm/board.c
         Control/Algorithm/board.h)
 
+add_executable(
+        QueueTest
+        Test/queuetest.c
+        Control/Algorithm/queue.c
+        Control/Algorithm/queue.h)
+add_executable(
+        AlgorithmTest
+        Test/algorithm.c
+        Control/control.h
+        Control/control.c
+        Control/operations.h
+        Control/arguments.h
+        Control/arguments.c
+        Control/Algorithm/queue.c
+        Control/Algorithm/queue.h
+        Control/Algorithm/defaults.h
+        Control/Algorithm/defaults.c
+        Control/Algorithm/types.h
+        Control/Algorithm/board.c
+        Control/Algorithm/board.h)
+
 # Tests:
 add_executable(SerialTest Test/serial.c Serial/platform.h Serial/params.h Serial/serial.h Serial/serial.c)
-add_executable(SerialMonitor Test/monitor.c Serial/platform.h Serial/params.h Serial/serial.h Serial/serial.c)
+add_executable(SerialMonitor Test/monitor.c Serial/platform.h Serial/params.h Serial/serial.h Serial/serial.c Test/algorithm.c)
