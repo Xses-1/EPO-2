@@ -33,9 +33,11 @@ bool isValidLocation(int row, int col)
 	bool isValidRow = row >= 0 && row < N_ROWS;
 	bool isValidCol = col >= 0 && col < N_COLS;
 	bool isValid = isValidRow && isValidCol;
+#if PRINT_ALGORITHM_DEBUG
 	printf("determined validity of %d/%d: %s\n", row, col,
 	       isValid ? "valid" : "invalid");
 	return isValid;
+#endif
 }
 
 bool shouldMoveToLocation(int **board, int row, int col)
@@ -45,16 +47,20 @@ bool shouldMoveToLocation(int **board, int row, int col)
 		return false;
 	}
 	int cellValue = board[row][col];
-	printf("read value of %d/%d: %d\n", row, col, cellValue);
 	bool shouldMove = cellValue == 0;
+#if PRINT_ALGORITHM_DEBUG
+	printf("read value of %d/%d: %d\n", row, col, cellValue);
 	printf("should move to %d/%d: %s\n", row, col,
 	       shouldMove ? "true" : "false");
+#endif
 	return shouldMove;
 }
 
 void writeToBoard(int **board, int row, int col, int value)
 {
+#if PRINT_ALGORITHM_DEBUG
 	printf("writing %d to %d/%d\n", value, row, col);
+#endif
 	board[row][col] = value;
 }
 
@@ -72,8 +78,10 @@ int calculatePath(int **board,
 	{
 		int currentRow, currentCol, currentDist;
 		takeFromQueue(queue, &currentRow, &currentCol, &currentDist);
+#if PRINT_ALGORITHM_DEBUG
 		printf("read from queue: %d / %d / %d\n", currentRow,
 		       currentCol, currentDist);
+#endif
 		if (currentRow == destRow && currentCol == destCol
 		    && distance == -1)
 		{

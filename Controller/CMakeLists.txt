@@ -3,6 +3,12 @@ project(EPO2 C)
 
 set(CMAKE_C_STANDARD 11)
 
+### Preprocessor definitions
+
+# In order to print a bunch of pathfinding-related debug stuff to console,
+#  set to 1 here
+add_definitions(-DPRINT_ALGORITHM_DEBUG=0)
+
 # Main application
 add_executable(
         EPO2 main.c
