@@ -26,7 +26,9 @@ add_executable(
         Control/Algorithm/defaults.h
         Control/Algorithm/defaults.c
         Control/Algorithm/board.c
-        Control/Algorithm/board.h Control/communication.c Control/communication.h)
+        Control/Algorithm/board.h
+        Control/communication.c
+        Control/communication.h)
 
 add_executable(
         QueueTest
