@@ -17,6 +17,7 @@ struct RobotStatus
 	bool isDriving;
 	bool isTurning;
 	bool isMakingUTurn;
+	bool readBit;
 };
 
 typedef struct RobotStatus RobotStatus;
