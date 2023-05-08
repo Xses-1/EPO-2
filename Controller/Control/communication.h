@@ -8,17 +8,11 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-struct SensorData
-{
-	bool left;
-	bool middle;
-	bool right;
-};
-
-typedef struct SensorData SensorData;
-
 struct RobotStatus
 {
+    bool leftLine;
+    bool middleLine;
+    bool rightLine;
 	bool mineDetected;
 	bool isDriving;
 	bool isTurning;
@@ -28,16 +22,14 @@ struct RobotStatus
 typedef struct RobotStatus RobotStatus;
 
 /**
- * Parses the given data and writes the obtained values to the structs located
- * at the given addresses.
+ * Parses the given data and writes the obtained values to the struct located
+ * at the given address.
  *
- * The function assumes that it may write to these addresses.
+ * The function assumes that it may write to this address.
  *
- * The function returns 1 if no data is available. If this is the case, nothing
- * will be written to the given addresses.
+ * The function returns a true value if no data is available. If this is the
+ * case, nothing will be written to the given address.
  */
-int parseIncomingData(uint8_t incoming,
-		      SensorData *sensorData,
-		      RobotStatus *robotStatus);
+bool parseIncomingData(uint8_t incoming, RobotStatus *status);
 
 #endif//EPO2_COMMUNICATION_H
