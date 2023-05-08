@@ -38,14 +38,14 @@ end entity controller;
 
 architecture behavioural of controller is
 	
-	type controller_state is 	(state_r, state_f, state_gl, state_sl, state_gr, state_sr,							-- line follower
-					 state_read_data, state_send_u, state_u_1, state_u_2, state_u_3, state_u_4, state_check_u,			-- u-turn
-					 state_send_s, state_s, state_check_s,										-- stop
-					 state_send_l, state_gl_d, state_sl_d, state_check_l,								-- left
-					 state_send_r, state_gr_d, state_sr_d, state_check_r,								-- right
-					 state_send_f, state_f_2, state_check_f);										-- forward
+	type controller_state is 	(state_r, state_f, state_gl, state_sl, state_gr, state_sr,					-- line follower
+					 state_read_data,										-- u-turn
+					 state_s, state_check_s,									-- stop
+					 state_gl_d, state_sl_d, state_check_l,								-- left
+					 state_gr_d, state_sr_d, state_check_r,								-- right
+					 state_f_d, state_check_f);									-- forward
 
-	signal state, new_state: controller_state;
+	signal state, new_state, prev_state: controller_state;
 
 
 begin
@@ -60,22 +60,22 @@ begin
 		end if;
 	end process;
 
-
-	
 	process (sensor_l, sensor_m, sensor_r, count_in, state, data_in, data_ready)
 	begin 
 		case state is
 
-		when state_r =>		count_reset <= '1';							-- also added write_data <= '0' and read_data <= '0' in the line follower part
+		when state_r =>		count_reset <= '1';							
 					motor_l_reset <= '1';
 					motor_r_reset <= '1';
 
 					motor_l_direction <= '0';
 					motor_r_direction <= '0';
 
--- added write_data <= '0' and read_data <= '0' in the line follower part
+		-- added write_data <= '0' and read_data <= '0' and data_out <= "00000000" in the line follower part
 					write_data <= '0';
 					read_data <= '0';
+
+					data_out <= "00000000";
 				
 				if ((sensor_l = '0') and (sensor_m = '0') and (sensor_r = '0')) then	
 					new_state <= state_f;
@@ -116,11 +116,12 @@ begin
 					motor_l_direction <= '1';
 					motor_r_direction <= '0';
 		
-		--other signals that need to be set
-		-- added write_data <= '0' and read_data <= '0' in the line follower part
+		-- added write_data <= '0' and read_data <= '0' and data_out <= "00000000" in the line follower part
 					write_data <= '0';
 					read_data <= '0';
-				
+					
+					data_out <= "00000000";
+										
 		--define new_state
 				
 				if (unsigned(count_in) < to_unsigned(1000000, 20)) then
@@ -139,11 +140,11 @@ begin
 					motor_l_direction <= '0';
 					motor_r_direction <= '0';
 
-		--other signals that need to be set
-		-- added write_data <= '0' and read_data <= '0' in the line follower part
+		-- added write_data <= '0' and read_data <= '0' and data_out <= "00000000" in the line follower part
 					write_data <= '0';
 					read_data <= '0';
 				
+					data_out <= "00000000";
 		--define new_state
 				
 				if (unsigned(count_in) < to_unsigned(1000000, 20)) then
@@ -153,8 +154,6 @@ begin
 					new_state <= state_r;
 
 				end if;
-
-				
 				
 		when state_sl =>	count_reset <= '0';
 					motor_l_reset <= '0';
@@ -163,11 +162,11 @@ begin
 					motor_l_direction <= '0';
 					motor_r_direction <= '0';
 		
-		--other signals that need to be set
-		-- added write_data <= '0' and read_data <= '0' in the line follower part
+		-- added write_data <= '0' and read_data <= '0' and data_out <= "00000000" in the line follower part
 					write_data <= '0';
 					read_data <= '0';
-				
+
+					data_out <= "00000000";				
 		--define new_state
 				
 				if (unsigned(count_in) < to_unsigned(1000000, 20)) then
@@ -179,7 +178,6 @@ begin
 				end if;
 
 
-
 		when state_gr =>	count_reset <= '0';
 					motor_l_reset <= '0';
 					motor_r_reset <= '1';
@@ -187,11 +185,11 @@ begin
 					motor_l_direction <= '1';
 					motor_r_direction <= '0';
 		
-		--other signals that need to be set
-		-- added write_data <= '0' and read_data <= '0' in the line follower part
+		-- added write_data <= '0' and read_data <= '0' and data_out <= "00000000" in the line follower part
 					write_data <= '0';
 					read_data <= '0';
-				
+
+					data_out <= "00000000";				
 		--define new_state
 				
 				if (unsigned(count_in) < to_unsigned(1000000, 20)) then
@@ -209,11 +207,12 @@ begin
 
 					motor_l_direction <= '1';
 					motor_r_direction <= '1';		
-		--other signals that need to be set
-		-- added write_data <= '0' and read_data <= '0' in the line follower part
+
+		-- added write_data <= '0' and read_data <= '0' and data_out <= "00000000" in the line follower part
 					write_data <= '0';
 					read_data <= '0';
-				
+
+					data_out <= "00000000";				
 		--define new_state
 				
 				if (unsigned(count_in) < to_unsigned(1000000, 20)) then
@@ -226,74 +225,228 @@ begin
 
 --new cases
 		when state_read_data =>
+			count_reset <= '1';
+			motor_l_reset <= '1';
+			motor_r_reset <= '1';
+
+			motor_l_direction <= '0';
+			motor_r_direction <= '0';
 			
-			-- missing: signals that need to be set
+			data_out <= "00000000";
+			write_data <= '0';
+			read_data <= '0';
+
 
 			if (data_in = "00000001") then			
-				new_state <= state_send_l;
+				new_state <= state_gl_d;
 
 			elsif (data_in = "00000010") then
-				new_state <= state_send_r;
+				new_state <= state_gr_d;
 
 			elsif (data_in = "00000011") then
-				new_state <= state_send_f;
+				new_state <= state_f_d;
 
 			elsif (data_in = "00000100") then
-				new_state <= state_send_u;
+				new_state <= state_s;
 
-			elsif (data_in = "00000101") then
-				new_state <= state_send_s;
+			elsif (data_in = "00000000") then		-- noop state
+				new_state <= prev_state;
 			else
-				new_state <= state_read_data;
--- u-turn
-		when state_send_u => 
+				new_state <= state_r;
+			end if;
 
-		when state_u_1 => 
-		
-		when state_u_2 =>
+-- stop state
+		when state_s =>		count_reset		<= '1';
+					motor_l_reset		<= '1';
+					motor_r_reset		<= '1';
 
-		when state_u_3 =>
+					motor_l_direction	<= '0';
+					motor_r_direction	<= '0';
 
-		when state_u_4 =>
+					data_out		<= "00000000";
 
-		when state_check_u =>
+					write_data		<= '0';
+					read_data		<= '0';
 
--- stop
+					prev_state		<= state_s;
+					new_state		<= state_check_s;
 
-		when state_send_s =>
+		when state_check_s =>	count_reset		<= '1';
 
-		when state_s =>
+					motor_l_reset		<= '1';
+					motor_r_reset		<= '1';
 
-		when state_check_s =>
-								
+					motor_l_direction	<= '0';
+					motor_r_direction	<= '0';
 
+					data_out(7)		<= '0';
+					data_out(6)		<= '0';
+					data_out(5)		<= '0';
+					data_out(4)		<= sensor_l;
+					data_out(3)		<= sensor_m;
+					data_out(2)		<= sensor_r;
+					data_out(1)		<= mine_s;
+					data_out(0)		<= '1';
+
+					write_data		<= '1';
+					read_data		<= '0'; 
+
+					new_state		<= state_r;
 -- left
-		when state_send_l =>
+		
+		when state_gl_d =>	count_reset		<= '0';
+					motor_l_reset		<= '1';
+					motor_r_reset		<= '0';
+					motor_l_direction	<= '0';
+					motor_r_direction	<= '0';
+					data_out		<= "00000000";
+					write_data		<= '0';
+					read_data		<= '0'; 
+					prev_state		<= state_gl_d;
+					new_state		<= state_sl_d;
 
-		when state_gl_d =>
 
-		when state_sl_d =>
+		when state_sl_d =>	count_reset		<= '0';
+					motor_l_reset		<= '0';
+					motor_r_reset		<= '0';
+					motor_l_direction	<= '0';
+					motor_r_direction	<= '0';
+					data_out		<= "00000000";
+					write_data		<= '0';
+					read_data		<= '0'; 
+					new_state		<= state_check_l;
 
-		when state_check_l =>
+
+		when state_check_l =>	
+					count_reset		<= '1';
+
+					motor_l_reset		<= '1';
+					motor_r_reset		<= '1';
+					motor_l_direction	<= '0';
+					motor_r_direction	<= '0';
+
+					data_out(7)		<= '1';
+					data_out(6)		<= '0';
+					data_out(5)		<= '1';
+					data_out(4)		<= sensor_l;
+					data_out(3)		<= sensor_m;
+					data_out(2)		<= sensor_r;
+					data_out(1)		<= mine_s;
+					data_out(0)		<= '1';
+
+					write_data		<= '1';
+					read_data		<= '0'; 
+					new_state		<= state_r;
 
 -- right
-		when state_send_r => 
-	
 		when state_gr_d  => 
+					
+			count_reset <= '0';
+			motor_l_reset <= '0';
+			motor_r_reset <= '1';
+
+			motor_l_direction <= '1';
+			motor_r_direction <= '0';
+			
+			data_out <= "00000000";
+			write_data <= '0';
+			read_data <= '0';
+			
+			prev_state <= state_gr_d;
+				
+			if (unsigned(count_in) < to_unsigned(1000000, 20)) then
+				new_state <= state_gr_d;
+					
+			elsif (unsigned(count_in) >= to_unsigned(1000000, 20)) then
+				new_state <= state_sr_d;
+
+			end if;
 
 		when state_sr_d  => 
 
+			count_reset <= '0';
+			motor_l_reset <= '0';
+			motor_r_reset <= '0';
+
+			motor_l_direction <= '1';
+			motor_r_direction <= '1';		
+
+			data_out <= "00000000";
+
+			write_data <= '0';
+			read_data <= '0';
+				
+			if (unsigned(count_in) < to_unsigned(1000000, 20)) then
+				new_state <= state_sr_d;
+					
+			elsif (unsigned(count_in) >= to_unsigned(1000000, 20)) then
+				new_state <= state_check_r;
+
+			end if;
+
 		when state_check_r  => 			
+			count_reset <= '1';							
+			motor_l_reset <= '1';
+			motor_r_reset <= '1';
 
+			motor_l_direction <= '0';
+			motor_r_direction <= '0';
+
+			data_out(7) <= '0';
+			data_out(6) <= '1';
+			data_out(5) <= '1';
+			data_out(4) <= sensor_l;
+			data_out(3) <= sensor_m;
+			data_out(2) <= sensor_r;
+			data_out(1) <= mine_s;
+			data_out(0) <= '1';
+
+			write_data <= '0';
+			read_data <= '1';
+
+			new_state <= state_r;
 -- forward
-		when state_send_f  => 
-		
-		when state_f  => 
-		
+		when state_f_d  => 
+			count_reset <= '0';
+			motor_l_reset <= '0';
+			motor_r_reset <= '0';
+
+			motor_l_direction <= '1';
+			motor_r_direction <= '0';
+
+			data_out <= "00000000";
+
+			write_data <= '0';
+			read_data <= '0';
+
+			prev_state <= state_f_d;
+			new_state <= state_check_f;
+
 		when state_check_f => 
+			count_reset <= '1';
+
+			motor_l_reset <= '1';
+			motor_r_reset <= '1';
+
+			motor_l_direction <= '0';
+			motor_r_direction <= '0';
+
+			data_out(7) <= '0';
+			data_out(6) <= '0';
+			data_out(5) <= '1';
+			data_out(4) <= sensor_l;
+			data_out(3) <= sensor_m;
+			data_out(2) <= sensor_r;
+			data_out(1) <= mine_s;
+			data_out(0) <= '1';
 
 
-			end case;
+			write_data <= '1';
+			read_data <= '0';
+
+			new_state <= state_r;
+
+		end case;
 	end process;
 end architecture behavioural;
 
