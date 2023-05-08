@@ -35,5 +35,38 @@ bool parseIncomingData(uint8_t incoming, RobotStatus *status);
 /**
  * This enum enumerates all different operations that can be sent to the robot.
  */
+enum RobotOp
+{
+	ROBOT_NOOP = 0b000,
+	ROBOT_LEFT = 0b001,
+	ROBOT_RIGHT = 0b010,
+	ROBOT_FORWARD = 0b011,
+	ROBOT_STOP = 0b100
+};
+
+typedef enum RobotOp RobotOp;
+
+/**
+ * Returns the address of the string representation of the given operation.
+ *
+ * The returned string is of the format `<NAME> // <OPCODE>`.
+ */
+char *opName(RobotOp op);
+
+/**
+ * Places the given operation in the operations queue.
+ */
+void queueOp(RobotOp op);
+
+/**
+ * Returns the next operation that is to be sent to the robot. If no operation
+ * is currently queued, the function will return `ROBOT_NOOP`.
+ */
+RobotOp nextOp();
+
+/**
+ * Prints each operation that is currently queued.
+ */
+void showOpQueue();
 
 #endif//EPO2_COMMUNICATION_H
