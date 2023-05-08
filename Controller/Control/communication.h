@@ -10,9 +10,9 @@
 
 struct RobotStatus
 {
-    bool leftLine;
-    bool middleLine;
-    bool rightLine;
+	bool leftLine;
+	bool middleLine;
+	bool rightLine;
 	bool mineDetected;
 	bool isDriving;
 	bool isTurning;
@@ -31,5 +31,9 @@ typedef struct RobotStatus RobotStatus;
  * case, nothing will be written to the given address.
  */
 bool parseIncomingData(uint8_t incoming, RobotStatus *status);
+
+/**
+ * This enum enumerates all different operations that can be sent to the robot.
+ */
 
 #endif//EPO2_COMMUNICATION_H
