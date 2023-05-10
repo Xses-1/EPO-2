@@ -38,6 +38,7 @@ bool isValidLocation(int row, int col)
 	       isValid ? "valid" : "invalid");
 	return isValid;
 #endif
+	return isValid;
 }
 
 bool shouldMoveToLocation(int **board, int row, int col)
