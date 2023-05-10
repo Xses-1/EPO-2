@@ -3,7 +3,6 @@
 //
 
 #include <stdlib.h>
-#include <stdio.h>
 
 #include "defaults.h"
 
@@ -23,11 +22,6 @@ const int DEFAULT_BOARD[N_ROWS][N_COLS] = {
 	{-1, -1, -1, -1,  0, -1,  0, -1,  0, -1, -1, -1, -1}
 };
 
-const int STATION_ROWS[] =
-	{12, 12, 12, 8, 6, 4, 0, 0, 0, 4, 6, 8};
-const int STATION_COLS[] =
-	{4, 6, 8, 12, 12, 12, 8, 6, 4, 0, 0, 0};
-
 int **getDefaultBoard()
 {
 	int **board = (int **) malloc(sizeof(int *) * N_ROWS);
@@ -40,16 +34,4 @@ int **getDefaultBoard()
 		}
 	}
 	return board;
-}
-
-void getStationLocation(int station, int *row, int *col)
-{
-	if (station < 1 || station > 12)
-	{
-		printf("illicit station identifier: %d\n", station);
-		return;
-	}
-	station -= 1;
-	*row = STATION_ROWS[station];
-	*col = STATION_COLS[station];
 }
