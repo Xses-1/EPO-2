@@ -23,3 +23,27 @@ void getStationLocation(int station, int *row, int *col)
 	*col = STATION_COLS[station];
 }
 
+Direction stationDirection(int station)
+{
+	if (station < 1 || station > 12)
+	{
+		printf("illicit station identifier: %d\n", station);
+		return NORTH;
+	}
+	station -= 1;
+	station /= 3
+	if (station == 0)
+	{
+		return NORTH;
+	} else if (station == 1)
+	{
+		return WEST;
+	} else if (station == 2)
+	{
+		return SOUTH;
+	} else
+	{
+		return EAST;
+	}
+}
+
