@@ -12,17 +12,16 @@
 /**
  * Initializes the control unit.
  */
-int initControl(PROGRAM_ARGS *args);
+void initControl(PROGRAM_ARGS *args);
 
 /**
- * Writes the next robot assignment to the given address.
+ * Returns the next assignment for the robot.
  */
-int getAssignment(uint8_t *assignment);
+uint8_t getAssignment();
 
 /**
- * Should parse the given information, which is assumed to have been retrieved
- * from the robot.
+ * Handles the given information as information retrieved from the robot.
  */
-int handleData(uint8_t *data);
+void handleData(uint8_t data);
 
 #endif//EPO2_CONTROL_H

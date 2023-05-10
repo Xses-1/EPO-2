@@ -18,6 +18,12 @@ set(    SOURCES
         Control/Algorithm/defaults.c
         Control/Algorithm/board.c
         Control/Algorithm/board.h
+        Control/states.c
+        Control/states.h
+        Control/stations.c
+        Control/stations.h
+        Control/direction.c
+        Control/direction.h
         Control/communication.c
         Control/communication.h)
 

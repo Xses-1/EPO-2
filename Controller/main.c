@@ -16,5 +16,6 @@ int main(int argc, char **argv)
 		return error;
 	}
 	printArguments(args);
+	initControl(args);
 	return 0;
 }

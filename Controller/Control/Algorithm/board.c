@@ -12,12 +12,6 @@
 const int POSSIBLE_ROW_DIFF[] = {-1, 0, 1, 0};
 const int POSSIBLE_COL_DIFF[] = {0, 1, 0, -1};
 
-/**
- * Is able to write four different positions to NEWCOL/NEWROW. The value of
- * INDEX must be in the range [0, 4).
- *
- * Note that this function may write illicit locations to the given addresses.
- */
 void getPossibleDirection(int index,
 			  int currentRow,
 			  int currentCol,
@@ -72,8 +66,8 @@ int calculatePath(int **board,
 		  int destCol)
 {
 	Queue *queue = createQueue();
-	appendToQueue(queue, startRow, startCol, 1);
-	writeToBoard(board, startRow, startCol, 1);
+	appendToQueue(queue, destRow, destCol, 1);
+	writeToBoard(board, destRow, destCol, 1);
 	int distance = -1;
 	while (getQueueLength(queue))
 	{
@@ -83,7 +77,7 @@ int calculatePath(int **board,
 		printf("read from queue: %d / %d / %d\n", currentRow,
 		       currentCol, currentDist);
 #endif
-		if (currentRow == destRow && currentCol == destCol
+		if (currentRow == startRow && currentCol == startCol
 		    && distance == -1)
 		{
 			distance = currentDist;
