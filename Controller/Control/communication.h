@@ -57,7 +57,7 @@ char *opName(RobotOp op);
 /**
  * Places the given operation in the operations queue.
  */
-void queueOp(RobotOp op);
+void queueOp(RobotOp op, int priority);
 
 /**
  * Returns the next operation that is to be sent to the robot. If no operation

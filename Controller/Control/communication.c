@@ -57,6 +57,7 @@ typedef struct OpNode OpNode;
 struct OpNode
 {
 	RobotOp op;
+	int priority;
 	OpNode *next;
 };
 
@@ -89,20 +90,21 @@ size_t opQueueLength()
 }
 
 /**
- * Returns a newly allocated `OpNode` with the given operation.
+ * Returns a newly allocated `OpNode` with the given operation and priority.
  */
-OpNode *newNode(RobotOp op)
+OpNode *newNode(RobotOp op, int priority)
 {
 	OpNode *new = (OpNode *) malloc(sizeof(OpNode));
 	new->next = NULL;
 	new->op = op;
+	new->priority = priority;
 	return new;
 }
 
-void queueOp(RobotOp op)
+void queueOp(RobotOp op, int priority)
 {
 	size_t queueLength = opQueueLength();
-	OpNode *next = newNode(op);
+	OpNode *next = newNode(op, priority);
 	if (queueLength == 0)
 	{
 		opQueue.first = next;
