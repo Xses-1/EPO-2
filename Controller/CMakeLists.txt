@@ -3,15 +3,7 @@ project(EPO2 C)
 
 set(CMAKE_C_STANDARD 11)
 
-### Preprocessor definitions
-
-# In order to print a bunch of pathfinding-related debug stuff to console,
-#  set to 1 here
-add_definitions(-DPRINT_ALGORITHM_DEBUG=0)
-
-# Main application
-add_executable(
-        EPO2 main.c
+set(    SOURCES
         Serial/platform.h
         Serial/params.h
         Serial/serial.h
@@ -30,26 +22,11 @@ add_executable(
         Control/communication.c
         Control/communication.h)
 
-add_executable(
-        QueueTest
-        Test/queuetest.c
-        Control/Algorithm/queue.c
-        Control/Algorithm/queue.h)
-add_executable(
-        AlgorithmTest
-        Test/algorithm.c
-        Control/control.h
-        Control/control.c
-        Control/operations.h
-        Control/arguments.h
-        Control/arguments.c
-        Control/Algorithm/queue.c
-        Control/Algorithm/queue.h
-        Control/Algorithm/defaults.h
-        Control/Algorithm/defaults.c
-        Control/Algorithm/board.c
-        Control/Algorithm/board.h)
+### Main application
+add_executable(EPO2 main.c ${SOURCES})
 
-# Tests:
-add_executable(SerialTest Test/serial.c Serial/platform.h Serial/params.h Serial/serial.h Serial/serial.c)
-add_executable(SerialMonitor Test/monitor.c Serial/platform.h Serial/params.h Serial/serial.h Serial/serial.c Test/algorithm.c)
+### Tests
+add_executable(QueueTest        Test/queuetest.c    ${SOURCES})
+add_executable(AlgorithmTest    Test/algorithm.c    ${SOURCES})
+add_executable(SerialTest       Test/serial.c       ${SOURCES})
+add_executable(SerialMonitor    Test/monitor.c      ${SOURCES})
