@@ -2,8 +2,6 @@
 // Created by Thijs J.A. van Esch on 1-5-2023.
 //
 
-#include "operations.h"
-
 #include "control.h"
 
 int initControl(PROGRAM_ARGS *args)
