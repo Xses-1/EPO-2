@@ -10,7 +10,6 @@ set(    SOURCES
         Serial/serial.c
         Control/control.h
         Control/control.c
-        Control/operations.h
         Control/arguments.h
         Control/arguments.c
         Control/Algorithm/queue.c
