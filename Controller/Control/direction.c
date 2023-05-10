@@ -8,14 +8,14 @@ char *directionString(Direction direction)
 {
 	switch (direction)
 	{
-		case NORTH:
-			return "NORTH";
-		case EAST:
-			return "EAST";
-		case SOUTH:
-			return "SOUTH";
-		default:
-			return "WEST";
+	case NORTH:
+		return "NORTH";
+	case EAST:
+		return "EAST";
+	case SOUTH:
+		return "SOUTH";
+	default:
+		return "WEST";
 	}
 }
 
@@ -23,14 +23,14 @@ Direction leftDirection(Direction direction)
 {
 	switch (direction)
 	{
-		case NORTH:
-			return WEST;
-		case EAST:
-			return NORTH;
-		case SOUTH:
-			return EAST;
-		case WEST:
-			return SOUTH;
+	case NORTH:
+		return WEST;
+	case EAST:
+		return NORTH;
+	case SOUTH:
+		return EAST;
+	case WEST:
+		return SOUTH;
 	}
 }
 
