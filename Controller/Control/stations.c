@@ -31,7 +31,7 @@ Direction stationDirection(int station)
 		return NORTH;
 	}
 	station -= 1;
-	station /= 3
+	station /= 3;
 	if (station == 0)
 	{
 		return NORTH;
