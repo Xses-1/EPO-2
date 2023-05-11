@@ -24,7 +24,7 @@ architecture behavioural of mine_sensor is
 type sensor_states is (reset_state, count_state, compare_state, detected_state);
 
 signal count, new_count: unsigned (11 downto 0) := to_unsigned(0,12);
-constant treshhold : unsigned(11 downto 0 ) :=  to_unsigned(1760, 12);
+constant treshhold : unsigned(11 downto 0 ) :=  to_unsigned(4500, 12);
 signal state, next_state : sensor_states;
 signal count_bit: std_logic_vector(11 downto 0);
 begin
