@@ -13,6 +13,12 @@ entity robot is
 		sensor_l_in     : in    std_logic;
 		sensor_m_in     : in    std_logic;
 		sensor_r_in     : in    std_logic;
+		
+		sensor_mine_in	: in	std_logic;
+		
+		rx		: in	std_logic;
+		tx		: out 	std_logic;
+		buffer_empty	: out	std_logic;
 
 		motor_l_pwm     : out   std_logic;
 		motor_r_pwm     : out   std_logic
@@ -111,6 +117,7 @@ signal count: std_logic_vector(19 downto 0);
 signal data_uico: std_logic_vector (7 downto 0);  --uart in controller out
 signal data_uoci: std_logic_vector (7 downto 0); -- uart out controller in
 signal write_sig, read_sig, data_ready_sig: std_logic; 
+signal mine_signal: std_logic;
 
 begin
 LB1: inputbuffer port map(	clk		=>	clk,
@@ -123,22 +130,22 @@ LB1: inputbuffer port map(	clk		=>	clk,
 				sensor_m_out	=>	sensor_m,
 				sensor_r_out	=>	sensor_r);
 
+
 -- UART groepje editen en checken graag.
 U1:	uart port map(
-					clk  => clk,
-					reset => reset,
+					clk  => 		clk,
+					reset => 		reset,
 
-					rx => ,	
-					tx => ,
+					rx => 			rx,	
+					tx => 			tx,
 
-					data_in => data_uico,     
-					buffer_empty =>   
-					write => write_sig,     
+					data_in => 		data_uico,     
+					buffer_empty => 	buffer_empty,
+					write => 		write_sig,     
 
-					data_out => data_uoci,
-					data_ready => data_ready_sig,  
-					read => read_sig    
-);
+					data_out => 		data_uoci,
+					data_ready => 		data_ready_sig,  
+					read => 		read_sig );
 
 LB2: controller port map(	
 				clk			=>	clk,
@@ -148,18 +155,18 @@ LB2: controller port map(
 				sensor_m		=>	sensor_m,
 				sensor_r		=>	sensor_r,
 
-				count_in		=>  count,
+				count_in		=>  	count,
 
 --new inputs
-				data_in			=> data_uoci  ,
-				data_ready		=> data_ready_sig, 
-				mine_s			=> ,  --port map naar sensor signal
+				data_in			=> 	data_uoci,
+				data_ready		=> 	data_ready_sig, 
+				mine_s			=> 	'0',  --port map naar sensor signal
 
 
 --new outputs
-				data_out		=> data_uico,
-				write_data		=> write_sig,
-				read_data		=> read_sig,
+				data_out		=> 	data_uico,
+				write_data		=> 	write_sig,
+				read_data		=> 	read_sig,
 --
 
 				count_reset		=>	count_rs,
@@ -171,7 +178,7 @@ LB2: controller port map(
 				motor_r_direction	=>	motor_r_d);
 
 
-LB3: timebase port map(		clk		=>	clk,
+T1: timebase port map(		clk		=>	clk,
 				reset		=>	count_rs,
 				count_out	=>	count);
 
@@ -193,7 +200,3 @@ MCR: motorcontrol port map(	clk		=>	clk,
 
 
 end architecture structural;
-
-
-
-
