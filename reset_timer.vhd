@@ -6,7 +6,6 @@ entity counter is
 	port (  clk             : in std_logic;
 		mine_out 	: in std_logic;
         	reset           : out std_logic;
-        	count_out       : out std_logic_vector (19 downto 0)
  	) ;
  end entity counter ;
 
@@ -42,6 +41,4 @@ entity counter is
 		new_count <= count + 1;
 
  	end process;
-
- 	count_out <= std_logic_vector ( count );
  end architecture behavioural;
