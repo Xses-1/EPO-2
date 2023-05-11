@@ -22,7 +22,7 @@ entity counter is
 				count <= ( others => '0');
 				reset <= '0';
 
-			elsif ( count = /*insert value here*/ ) then
+			elsif ( count = 4000 ) then
 				
 				count <= count;
 				reset <= '1';
