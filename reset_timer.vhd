@@ -2,14 +2,14 @@ library IEEE;
 use IEEE.std_logic_1164.all;
 use IEEE.numeric_std.all;
 
-entity counter is
+entity mine_counter is
 	port (  clk             : in std_logic;
 		mine_out 	: in std_logic;
-        	reset           : out std_logic;
+        	reset           : out std_logic
  	) ;
- end entity counter ;
+ end entity mine_counter ;
 
- architecture behavioural of counter is
+ architecture behavioural of mine_counter is
 
  	signal count, new_count : unsigned (19 downto 0);
 
