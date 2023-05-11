@@ -234,7 +234,7 @@ begin
 			
 			data_out <= "00000000";
 			write_data <= '0';
-			read_data <= '0';
+			read_data <= '1';
 
 
 			if (data_in = "00000001") then			
@@ -269,7 +269,15 @@ begin
 					read_data		<= '0';
 
 					prev_state		<= state_s;
-					new_state		<= state_check_s;
+
+					if (unsigned(count_in) < to_unsigned(1000000, 20)) then
+						new_state <= state_s;
+							
+					elsif (unsigned(count_in) >= to_unsigned(1000000, 20)) then
+						new_state <= state_check_s;
+		
+					end if;
+		
 
 		when state_check_s =>	count_reset		<= '1';
 
@@ -291,7 +299,13 @@ begin
 					write_data		<= '1';
 					read_data		<= '0'; 
 
-					new_state		<= state_r;
+					if (unsigned(count_in) < to_unsigned(1000000, 20)) then
+						new_state <= state_check_s;
+							
+					elsif (unsigned(count_in) >= to_unsigned(1000000, 20)) then
+						new_state <= state_r;
+		
+					end if;
 -- left
 		
 		when state_gl_d =>	count_reset		<= '0';
@@ -302,9 +316,16 @@ begin
 					data_out		<= "00000000";
 					write_data		<= '0';
 					read_data		<= '0'; 
-					prev_state		<= state_gl_d;
-					new_state		<= state_sl_d;
 
+					prev_state		<= state_gl_d;
+
+					if (unsigned(count_in) < to_unsigned(1000000, 20)) then
+						new_state <= state_gl_d;
+							
+					elsif (unsigned(count_in) >= to_unsigned(1000000, 20)) then
+						new_state <= state_sl_d;
+		
+					end if;
 
 		when state_sl_d =>	count_reset		<= '0';
 					motor_l_reset		<= '0';
@@ -314,8 +335,14 @@ begin
 					data_out		<= "00000000";
 					write_data		<= '0';
 					read_data		<= '0'; 
-					new_state		<= state_check_l;
 
+					if (unsigned(count_in) < to_unsigned(1000000, 20)) then
+						new_state <= state_sl_d;
+							
+					elsif (unsigned(count_in) >= to_unsigned(1000000, 20)) then
+						new_state <= state_check_l;
+		
+					end if;
 
 		when state_check_l =>	
 					count_reset		<= '1';
@@ -336,7 +363,14 @@ begin
 
 					write_data		<= '1';
 					read_data		<= '0'; 
-					new_state		<= state_r;
+
+					if (unsigned(count_in) < to_unsigned(1000000, 20)) then
+						new_state <= state_check_l;
+							
+					elsif (unsigned(count_in) >= to_unsigned(1000000, 20)) then
+						new_state <= state_r;
+		
+					end if;
 
 -- right
 		when state_gr_d  => 
@@ -401,10 +435,18 @@ begin
 			data_out(1) <= mine_s;
 			data_out(0) <= '1';
 
-			write_data <= '0';
-			read_data <= '1';
+			write_data <= '1';
+			read_data <= '0';
 
-			new_state <= state_r;
+
+			if (unsigned(count_in) < to_unsigned(1000000, 20)) then
+				new_state <= state_check_r;
+					
+			elsif (unsigned(count_in) >= to_unsigned(1000000, 20)) then
+				new_state <= state_r;
+
+			end if;
+
 -- forward
 		when state_f_d  => 
 			count_reset <= '0';
@@ -420,7 +462,14 @@ begin
 			read_data <= '0';
 
 			prev_state <= state_f_d;
-			new_state <= state_check_f;
+
+			if (unsigned(count_in) < to_unsigned(1000000, 20)) then
+				new_state <= state_f_d;
+					
+			elsif (unsigned(count_in) >= to_unsigned(1000000, 20)) then
+				new_state <= state_check_f;
+
+			end if;
 
 		when state_check_f => 
 			count_reset <= '1';
@@ -440,32 +489,19 @@ begin
 			data_out(1) <= mine_s;
 			data_out(0) <= '1';
 
-
 			write_data <= '1';
 			read_data <= '0';
 
 			new_state <= state_r;
 
+			if (unsigned(count_in) < to_unsigned(1000000, 20)) then
+				new_state <= state_check_f;
+					
+			elsif (unsigned(count_in) >= to_unsigned(1000000, 20)) then
+				new_state <= state_r;
+
+			end if;
+
 		end case;
 	end process;
 end architecture behavioural;
-
-				
-
-				
-		
-					
-				
-		
-
-
-
-
-
-
-
-
-
-
-
-
