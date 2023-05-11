@@ -78,7 +78,7 @@ begin
 					data_out <= "00000000";
 				
 				if ((sensor_l = '0') and (sensor_m = '0') and (sensor_r = '0')) then	
-					new_state <= state_f;
+					new_state <= state_r;              --new_state <= state_f;
 
 				elsif (sensor_l = '0' and sensor_m = '0' and sensor_r = '1') then
 					new_state <= state_gl;
@@ -99,7 +99,7 @@ begin
 					new_state <= state_sr;
 
 				elsif (sensor_l = '1' and sensor_m = '1' and sensor_r = '1') then
-					new_state <= state_f;
+					new_state <= state_r;
 -- new: data_in part 		
 				elsif (data_ready = '1') then
 					new_state <= state_read_data;	
