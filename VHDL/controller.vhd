@@ -40,7 +40,7 @@ architecture behavioural of controller is
 	
 	type controller_state is 	(state_r, state_f, state_gl, state_sl, state_gr, state_sr,					-- line follower
 					 state_read_data,										-- u-turn
-					 state_s,											-- stop
+					 state_s, state_s_2,											-- stop
 					 state_gl_d, state_sl_d,									-- left
 					 state_gr_d, state_sr_d, 									-- right
 					 state_f_d);											-- forward
@@ -280,13 +280,38 @@ begin
 					read_data		<= '0';
 
 					prev_state		<= state_s;
-
-					if (unsigned(count_in) < to_unsigned(1000000, 20)) then
-						new_state <= state_s;
+					new_state		<= state_s_2;
+	                             -- if (unsigned(count_in) < to_unsigned(1000000, 20)) then
+						--new_state <= state_s;
 							
-					elsif (unsigned(count_in) >= to_unsigned(1000000, 20)) then
-						new_state <= state_r;
+					--elsif (unsigned(count_in) >= to_unsigned(1000000, 20)) then
+						--new_state <= state_r;
 		
+					--end if;
+
+		when state_s_2 =>	count_reset		<= '1';             --new state for "onthouden" bij stop
+					motor_l_reset		<= '1';
+					motor_r_reset		<= '1';
+
+					motor_l_direction	<= '0';
+					motor_r_direction	<= '0';
+
+					data_out(7)		<= '0';
+					data_out(6)		<= '0';
+					data_out(5)		<= '0';
+					data_out(4)		<= sensor_l;
+					data_out(3)		<= sensor_m;
+					data_out(2)		<= sensor_r;
+					data_out(1)		<= mine_s;
+					data_out(0)		<= '1';
+
+					write_data <= '1';
+					read_data <= '0';
+
+					if (data_ready = '0') then
+						new_state <= state_s_2;
+					else
+						new_state <= state_read_data;
 					end if;
 		
 -- left
