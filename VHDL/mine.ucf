@@ -1,0 +1,3 @@
+NET "clk" LOC = B8;
+NET "mine_sensor_in" LOC = C6;
+NET "mine_out" LOC = M5;
