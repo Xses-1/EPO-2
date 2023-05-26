@@ -76,8 +76,10 @@ begin
 					read_data <= '0';
 
 					data_out <= "00000000";
+					
+					next_state <= state_read_data;
 
-				if (data_ready = '0') then
+				/* if (data_ready = '0') then
 					if ((sensor_l = '0') and (sensor_m = '0') and (sensor_r = '0')) then	
 					new_state <= state_r;              --new_state <= state_f;
 
@@ -108,7 +110,7 @@ begin
 				-- new: data_in part (when data_ready = '1') 		
 				else 
 					new_state <= state_read_data;
-				end if;
+				end if;*/
 
 
 
@@ -255,7 +257,7 @@ begin
 					elsif (data_in = "00000000") then		-- noop state
 						new_state <= prev_state;
 					else
-						new_state <= state_r;
+						new_state <= state_read_data;
 					end if;
 
 
@@ -415,7 +417,7 @@ begin
 				end if;
 
 -- forward
-		when state_f_d  => 
+		when state_f_write  => 
 					count_reset <= '0';
 					motor_l_reset <= '0';
 					motor_r_reset <= '0';
@@ -423,6 +425,9 @@ begin
 					motor_l_direction <= '1';
 					motor_r_direction <= '0';
 
+					write_data <= '1';
+					read_data <= '0';
+					
 					data_out(7) <= '0';
 					data_out(6) <= '0';
 					data_out(5) <= '1';
@@ -431,19 +436,139 @@ begin
 					data_out(2) <= sensor_r;
 					data_out(1) <= mine_s;
 					data_out(0) <= '1';
+										
+			--define new_state or correct when offset from path
+					if (data_ready = '1') then
+						new_state	<= state_f_read;
 
-					write_data <= '1';
+					elsif (sensor_l = '0' and sensor_m = '0' and sensor_r = '1') then
+						new_state <= state_gl;
+
+					elsif (sensor_l = '0' and sensor_m = '1' and sensor_r = '1') then
+						new_state <= state_sl;
+
+					elsif (sensor_l = '1' and sensor_m = '0' and sensor_r = '0') then
+						new_state <= state_gr;
+
+					elsif (sensor_l = '1' and sensor_m = '1' and sensor_r = '0') then
+						new_state <= state_sr;
+
+					else 
+						new_state <= state_f_write;
+
+					end if;
+		
+		
+
+		when state_f_read =>	count_reset <= '0';
+					motor_l_reset <= '0';
+					motor_r_reset <= '0';
+
+					motor_l_direction <= '1';
+					motor_r_direction <= '0';
+					
+					data_out <= "00000000";
+		
+					write_data <= '0';
+					read_data <= '1';
+
+					if (data_in = "00000001") then			
+						new_state <= state_gl_d;
+
+					elsif (data_in = "00000010") then
+						new_state <= state_gr_d;
+
+					elsif (data_in = "00000011") then
+						new_state <= state_f_d;
+
+					elsif (data_in = "00000100") then
+						new_state <= state_s;
+					else
+						new_state <= state_f_write;
+					end if;
+										
+
+		when state_gl =>	count_reset <= '0';
+					motor_l_reset <= '1';
+					motor_r_reset <= '0';
+
+					motor_l_direction <= '0';
+					motor_r_direction <= '0';
+
+					write_data <= '0';
+					read_data <= '0';
+				
+					data_out <= "00000000";
+			
+				if (unsigned(count_in) < to_unsigned(1000000, 20)) then
+					new_state <= state_gl;
+					
+				elsif (unsigned(count_in) >= to_unsigned(1000000, 20)) then
+					new_state <= state_f_write;
+
+				end if;
+				
+		when state_sl =>	count_reset <= '0';
+					motor_l_reset <= '0';
+					motor_r_reset <= '0';
+
+					motor_l_direction <= '0';
+					motor_r_direction <= '0';
+		
+					write_data <= '0';
 					read_data <= '0';
 
-					prev_state <= state_f_d;
-
-			if (unsigned(count_in) < to_unsigned(1000000, 20)) then
-				new_state <= state_f_d;
+					data_out <= "00000000";				
+			
+				if (unsigned(count_in) < to_unsigned(1000000, 20)) then
+					new_state <= state_sl;
 					
-			elsif (unsigned(count_in) >= to_unsigned(1000000, 20)) then
-				new_state <= state_r;
+				elsif (unsigned(count_in) >= to_unsigned(1000000, 20)) then
+					new_state <= state_f_write;
 
-			end if;
+				end if;
+
+
+		when state_gr =>	count_reset <= '0';
+					motor_l_reset <= '0';
+					motor_r_reset <= '1';
+
+					motor_l_direction <= '1';
+					motor_r_direction <= '0';
+
+					write_data <= '0';
+					read_data <= '0';
+
+					data_out <= "00000000";		
+				
+				if (unsigned(count_in) < to_unsigned(1000000, 20)) then
+					new_state <= state_gr;
+					
+				elsif (unsigned(count_in) >= to_unsigned(1000000, 20)) then
+					new_state <= state_f_write;
+
+				end if;
+
+
+		when state_sr =>	count_reset <= '0';
+					motor_l_reset <= '0';
+					motor_r_reset <= '0';
+
+					motor_l_direction <= '1';
+					motor_r_direction <= '1';		
+
+					write_data <= '0';
+					read_data <= '0';
+
+					data_out <= "00000000";		
+				
+				if (unsigned(count_in) < to_unsigned(1000000, 20)) then
+					new_state <= state_sr;
+					
+				elsif (unsigned(count_in) >= to_unsigned(1000000, 20)) then
+					new_state <= state_f_write;
+
+				end if;
 
 		end case;
 	end process;
