@@ -70,13 +70,20 @@ begin
 					motor_l_direction <= '0';
 					motor_r_direction <= '0';
 
-					write_data <= '0';
+					write_data <= '1';
 					read_data <= '0';
 
-					data_out <= "00000000";
+					data_out(7)		<= '0';
+					data_out(6)		<= '0';
+					data_out(5)		<= '0';
+					data_out(4)		<= sensor_l;
+					data_out(3)		<= sensor_m;
+					data_out(2)		<= sensor_r;
+					data_out(1)		<= mine_s;
+					data_out(0)		<= '1';
 					
 				if (data_ready = '1') then
-					new_state <= state_r_read;
+					new_state <= state_reset_read;
 				else 
 					new_state <= state_r;
 				end if;
