@@ -38,14 +38,13 @@ end entity controller;
 
 architecture behavioural of controller is
 	
-	type controller_state is 	(state_r, state_f, state_gl, state_sl, state_gr, state_sr,					-- line follower
-					 state_read_data,										-- u-turn
-					 state_s, state_s_2,											-- stop
-					 state_gl_d, state_sl_d,									-- left
-					 state_gr_d, state_sr_d, 									-- right
-					 state_f_d);											-- forward
+	type controller_state is	(state_r, state_reset_read,
+					 state_s_write, state_s_read,										
+					 state_gl_d, state_sl_d, state_l_read,								
+					 state_gr_d, state_sr_d, state_r_read,								
+					 state_f_write, state_f_read, state_gl, state_sl, state_gr, state_sr);											
 
-	signal state, new_state, prev_state: controller_state;
+	signal state, new_state: controller_state;
 
 
 begin
@@ -71,176 +70,30 @@ begin
 					motor_l_direction <= '0';
 					motor_r_direction <= '0';
 
-			-- added write_data <= '0' and read_data <= '0' and data_out <= "00000000" in the line follower part
 					write_data <= '0';
 					read_data <= '0';
 
 					data_out <= "00000000";
 					
-					next_state <= state_read_data;
-
-				/* if (data_ready = '0') then
-					if ((sensor_l = '0') and (sensor_m = '0') and (sensor_r = '0')) then	
-					new_state <= state_r;              --new_state <= state_f;
-
-					elsif (sensor_l = '0' and sensor_m = '0' and sensor_r = '1') then
-					new_state <= state_gl;
-
-					elsif (sensor_l = '0' and sensor_m = '1' and sensor_r = '0') then
-					new_state <= state_f;
-
-					elsif (sensor_l = '0' and sensor_m = '1' and sensor_r = '1') then
-					new_state <= state_sl;
-
-					elsif (sensor_l = '1' and sensor_m = '0' and sensor_r = '0') then
-					new_state <= state_gr;
-
-					elsif (sensor_l = '1' and sensor_m = '0' and sensor_r = '1') then
-					new_state <= state_f;
-
-					elsif (sensor_l = '1' and sensor_m = '1' and sensor_r = '0') then
-					new_state <= state_sr;
-
-					elsif (sensor_l = '1' and sensor_m = '1' and sensor_r = '1') then
-					new_state <= state_r;
-					else 
-					new_state <= state_r;
-					end if;
-
-				-- new: data_in part (when data_ready = '1') 		
+				if (data_ready = '1') then
+					new_state <= state_r_read;
 				else 
-					new_state <= state_read_data;
-				end if;*/
-
-
-
-		when state_f =>		count_reset <= '0';
-					motor_l_reset <= '0';
-					motor_r_reset <= '0';
-
-					motor_l_direction <= '1';
-					motor_r_direction <= '0';
-		
-			-- added write_data <= '0' and read_data <= '0' and data_out <= "00000000" in the line follower part
-					write_data <= '0';
-					read_data <= '0';
-					
-					data_out <= "00000000";
-										
-			--define new_state
-				
-				if (unsigned(count_in) < to_unsigned(1000000, 20)) then
-					new_state <= state_f;
-					
-				elsif (unsigned(count_in) >= to_unsigned(1000000, 20)) then
 					new_state <= state_r;
-
 				end if;
 
 
-		when state_gl =>	count_reset <= '0';
-					motor_l_reset <= '1';
-					motor_r_reset <= '0';
 
-					motor_l_direction <= '0';
-					motor_r_direction <= '0';
-
-			-- added write_data <= '0' and read_data <= '0' and data_out <= "00000000" in the line follower part
-					write_data <= '0';
-					read_data <= '0';
-				
-					data_out <= "00000000";
-			--define new_state
-				
-				if (unsigned(count_in) < to_unsigned(1000000, 20)) then
-					new_state <= state_gl;
-					
-				elsif (unsigned(count_in) >= to_unsigned(1000000, 20)) then
-					new_state <= state_r;
-
-				end if;
-				
-		when state_sl =>	count_reset <= '0';
-					motor_l_reset <= '0';
-					motor_r_reset <= '0';
-
-					motor_l_direction <= '0';
-					motor_r_direction <= '0';
-		
-			-- added write_data <= '0' and read_data <= '0' and data_out <= "00000000" in the line follower part
-					write_data <= '0';
-					read_data <= '0';
-
-					data_out <= "00000000";				
-			--define new_state
-				
-				if (unsigned(count_in) < to_unsigned(1000000, 20)) then
-					new_state <= state_sl;
-					
-				elsif (unsigned(count_in) >= to_unsigned(1000000, 20)) then
-					new_state <= state_r;
-
-				end if;
-
-
-		when state_gr =>	count_reset <= '0';
-					motor_l_reset <= '0';
-					motor_r_reset <= '1';
-
-					motor_l_direction <= '1';
-					motor_r_direction <= '0';
-		
-			-- added write_data <= '0' and read_data <= '0' and data_out <= "00000000" in the line follower part
-					write_data <= '0';
-					read_data <= '0';
-
-					data_out <= "00000000";				
-			--define new_state
-				
-				if (unsigned(count_in) < to_unsigned(1000000, 20)) then
-					new_state <= state_gr;
-					
-				elsif (unsigned(count_in) >= to_unsigned(1000000, 20)) then
-					new_state <= state_r;
-
-				end if;
-
-
-		when state_sr =>	count_reset <= '0';
-					motor_l_reset <= '0';
-					motor_r_reset <= '0';
-
-					motor_l_direction <= '1';
-					motor_r_direction <= '1';		
-
-			-- added write_data <= '0' and read_data <= '0' and data_out <= "00000000" in the line follower part
-					write_data <= '0';
-					read_data <= '0';
-
-					data_out <= "00000000";				
-			--define new_state
-				
-				if (unsigned(count_in) < to_unsigned(1000000, 20)) then
-					new_state <= state_sr;
-					
-				elsif (unsigned(count_in) >= to_unsigned(1000000, 20)) then
-					new_state <= state_r;
-
-				end if;
-
---new cases
-		when state_read_data =>	
-						count_reset <= '1';
+		when state_reset_read=>		count_reset <= '1';							
 						motor_l_reset <= '1';
 						motor_r_reset <= '1';
-
+	
 						motor_l_direction <= '0';
 						motor_r_direction <= '0';
-			
-						data_out <= "00000000";
+
 						write_data <= '0';
 						read_data <= '1';
-
+	
+						data_out <= "00000000";
 
 					if (data_in = "00000001") then			
 						new_state <= state_gl_d;
@@ -249,74 +102,80 @@ begin
 						new_state <= state_gr_d;
 
 					elsif (data_in = "00000011") then
-						new_state <= state_f_d;
+						new_state <= state_f_write;
 
 					elsif (data_in = "00000100") then
-						new_state <= state_s;
-
-					elsif (data_in = "00000000") then		-- noop state
-						new_state <= prev_state;
+						new_state <= state_s_write;
 					else
-						new_state <= state_read_data;
+						new_state <= state_r;
 					end if;
 
 
--- stop state
-		when state_s =>		count_reset		<= '1';
-					motor_l_reset		<= '1';
-					motor_r_reset		<= '1';
+--new cases
 
-					motor_l_direction	<= '0';
-					motor_r_direction	<= '0';
 
-					data_out(7)		<= '0';
-					data_out(6)		<= '0';
-					data_out(5)		<= '0';
-					data_out(4)		<= sensor_l;
-					data_out(3)		<= sensor_m;
-					data_out(2)		<= sensor_r;
-					data_out(1)		<= mine_s;
-					data_out(0)		<= '1';
+-- stop branch, bestaande uit state_s_write en state_s_read.
 
-					write_data		<= '1';
-					read_data		<= '0';
+		when state_s_write =>		count_reset		<= '1';
+						motor_l_reset		<= '1';
+						motor_r_reset		<= '1';
 
-					prev_state		<= state_s;
-					new_state		<= state_s_2;
-	                             -- if (unsigned(count_in) < to_unsigned(1000000, 20)) then
-						--new_state <= state_s;
+						motor_l_direction	<= '0';
+						motor_r_direction	<= '0';
+
+						data_out(7)		<= '0';
+						data_out(6)		<= '0';
+						data_out(5)		<= '0';
+						data_out(4)		<= sensor_l;
+						data_out(3)		<= sensor_m;
+						data_out(2)		<= sensor_r;
+						data_out(1)		<= mine_s;
+						data_out(0)		<= '1';
+
+						write_data		<= '1';
+						read_data		<= '0';
+
+	                             	if (unsigned(count_in) < to_unsigned(1000000, 20)) then
+						new_state <= state_s_write;
 							
-					--elsif (unsigned(count_in) >= to_unsigned(1000000, 20)) then
-						--new_state <= state_r;
+					elsif (unsigned(count_in) >= to_unsigned(1000000, 20)) then	--Is het beter om te loopen hierin (zoals
+						new_state <= state_s_read;				-- in de state_f_write) of eerst naar state_s_read te gaan? en als data = 0 dan weer terug?
 		
-					--end if;
+					end if;
 
-		when state_s_2 =>	count_reset		<= '1';             --new state for "onthouden" bij stop
-					motor_l_reset		<= '1';
-					motor_r_reset		<= '1';
+		when state_s_read =>	count_reset		<= '1';		--state s read, als geen data dan gwn terug naar stop_s_write, 
+					motor_l_reset		<= '1';		--is dit de state waar we na reset meteen heen gaan?
+					motor_r_reset		<= '1';	
 
 					motor_l_direction	<= '0';
 					motor_r_direction	<= '0';
 
-					data_out(7)		<= '0';
-					data_out(6)		<= '0';
-					data_out(5)		<= '0';
-					data_out(4)		<= sensor_l;
-					data_out(3)		<= sensor_m;
-					data_out(2)		<= sensor_r;
-					data_out(1)		<= mine_s;
-					data_out(0)		<= '1';
+					data_out		<= "00000000";
 
-					write_data <= '1';
-					read_data <= '0';
+					write_data <= '0';
+					read_data <= '1';
 
 					if (data_ready = '0') then
-						new_state <= state_s_2;
+						new_state <= state_s_write;
+
+					elsif (data_in = "00000001") then			
+						new_state <= state_gl_d;
+
+					elsif (data_in = "00000010") then
+						new_state <= state_gr_d;
+
+					elsif (data_in = "00000011") then
+						new_state <= state_f_write;
+
+					elsif (data_in = "00000100") then
+						new_state <= state_s_write;
 					else
-						new_state <= state_read_data;
+						new_state <= state_s_write;
 					end if;
-		
--- left
+
+				
+
+-- left branch door data van thijs, bestaande uit state_gl_d, state_sl_d en state_l_read.
 		
 		when state_gl_d =>	count_reset		<= '0';
 					motor_l_reset		<= '1';
@@ -336,21 +195,20 @@ begin
 					write_data		<= '1';
 					read_data		<= '0'; 
 
-					prev_state		<= state_gl_d;
-
 					if (unsigned(count_in) < to_unsigned(1000000, 20)) then
 						new_state <= state_gl_d;
 							
 					elsif (unsigned(count_in) >= to_unsigned(1000000, 20)) then
 						new_state <= state_sl_d;
-		
 					end if;
+
 
 		when state_sl_d =>	count_reset		<= '0';
 					motor_l_reset		<= '0';
 					motor_r_reset		<= '0';
 					motor_l_direction	<= '0';
 					motor_r_direction	<= '0';
+
 					data_out		<= "00000000";
 					write_data		<= '0';
 					read_data		<= '0'; 
@@ -359,11 +217,41 @@ begin
 						new_state <= state_sl_d;
 							
 					elsif (unsigned(count_in) >= to_unsigned(1000000, 20)) then
-						new_state <= state_r;
+						new_state <= state_l_read;
 		
 					end if;
 
--- right
+		when state_l_read =>	count_reset		<= '1';		 
+					motor_l_reset		<= '1';		
+					motor_r_reset		<= '1';	
+
+					motor_l_direction	<= '0';
+					motor_r_direction	<= '0';
+
+					data_out		<= "00000000";
+					write_data 		<= '0';
+					read_data 		<= '1';
+
+					if (data_ready = '0') then
+						new_state <= state_gl_d;
+
+					elsif (data_in = "00000001") then			
+						new_state <= state_gl_d;
+
+					elsif (data_in = "00000010") then
+						new_state <= state_gr_d;
+
+					elsif (data_in = "00000011") then
+						new_state <= state_f_write;
+
+					elsif (data_in = "00000100") then
+						new_state <= state_s_write;
+					else
+						new_state <= state_gl_d;
+					end if;
+
+
+-- right branch door data van thijs, bestaande uit state_gr_d, state_sr_d, state_r_read.
 		when state_gr_d  => 
 					count_reset <= '0';
 					motor_l_reset <= '0';
@@ -383,8 +271,6 @@ begin
 
 					write_data <= '1';
 					read_data <= '0';
-
-					prev_state <= state_gr_d;
 				
 				if (unsigned(count_in) < to_unsigned(1000000, 20)) then
 					new_state <= state_gr_d;
@@ -394,9 +280,8 @@ begin
 
 				end if;
 
-		when state_sr_d  => 
 
-					count_reset <= '0';
+		when state_sr_d  => 	count_reset <= '0';
 					motor_l_reset <= '0';
 					motor_r_reset <= '0';
 
@@ -412,11 +297,40 @@ begin
 					new_state <= state_sr_d;
 					
 				elsif (unsigned(count_in) >= to_unsigned(1000000, 20)) then
-					new_state <= state_r;
-
+					new_state <= state_r_read;
 				end if;
 
--- forward
+
+		when state_r_read => 	count_reset		<= '1';		 
+					motor_l_reset		<= '1';		
+					motor_r_reset		<= '1';	
+
+					motor_l_direction	<= '0';
+					motor_r_direction	<= '0';
+
+					data_out		<= "00000000";
+					write_data <= '0';
+					read_data <= '1';
+					
+					if (data_ready = '0') then
+						new_state <= state_gr_d;
+
+					elsif (data_in = "00000001") then			
+						new_state <= state_gl_d;
+
+					elsif (data_in = "00000010") then
+						new_state <= state_gr_d;
+
+					elsif (data_in = "00000011") then
+						new_state <= state_f_write;
+
+					elsif (data_in = "00000100") then
+						new_state <= state_s_write;
+					else
+						new_state <= state_gr_d;
+					end if;
+
+-- forward branch met state_f_write, state_f_read en de line follower.
 		when state_f_write  => 
 					count_reset <= '0';
 					motor_l_reset <= '0';
@@ -479,10 +393,10 @@ begin
 						new_state <= state_gr_d;
 
 					elsif (data_in = "00000011") then
-						new_state <= state_f_d;
+						new_state <= state_f_write;
 
 					elsif (data_in = "00000100") then
-						new_state <= state_s;
+						new_state <= state_s_write;
 					else
 						new_state <= state_f_write;
 					end if;
@@ -572,4 +486,4 @@ begin
 
 		end case;
 	end process;
-end architecture behavioural;
+end architecture behavioural;	
