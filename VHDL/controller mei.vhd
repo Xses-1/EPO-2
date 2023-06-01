@@ -46,9 +46,27 @@ architecture behavioural of controller is
 					 state_f_d);											-- forward
 
 	signal state, new_state, prev_state: controller_state;
+	signal crossing, crosscounter: std_logic;
 
 
 begin
+	
+	crossing <= '0';		---------------------------IMPORTANT: Mag dit? (Bedoeling is dat het zoals bij arduino setup maar 1 keer gerunned wordt.
+	crosscounter <= '0';
+
+	process (sensor_l, sensor_m, sensor_r, crosscounter)
+	begin
+		if (sensor_l = '1' and sensor_m = '1' and sensor_r = '1') then
+			if (crosscounter = '0') then
+				crosscounter <= '1';
+				crossing <= '1';
+			elsif (crosscounter = '1') then
+				crosscounter <= '0';
+				crossing <= '0';
+			end if;
+		end if;
+	end process;
+
 	process (clk)
 	begin
 		if (rising_edge (clk)) then
