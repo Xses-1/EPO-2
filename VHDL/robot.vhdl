@@ -109,6 +109,12 @@ component uart is
     );
 end component uart;
 
+component mine_sensor_top is
+	port (	clk		: in std_logic;
+		mine_sensor_in	: in std_logic;
+		mine_out	: out std_logic
+	);
+end component mine_sensor_top;
 
 signal sensor_l, sensor_m, sensor_r, count_rs, motor_l_rs, motor_l_d, motor_r_rs, motor_r_d: std_logic;
 signal count: std_logic_vector(19 downto 0); 
@@ -118,6 +124,7 @@ signal data_uico: std_logic_vector (7 downto 0);  --uart in controller out
 signal data_uoci: std_logic_vector (7 downto 0); -- uart out controller in
 signal write_sig, read_sig, data_ready_sig: std_logic; 
 signal mine_signal: std_logic;
+signal mine_out_signal: std_logic;
 
 begin
 LB1: inputbuffer port map(	clk		=>	clk,
@@ -129,6 +136,10 @@ LB1: inputbuffer port map(	clk		=>	clk,
 				sensor_l_out	=>	sensor_l,
 				sensor_m_out	=>	sensor_m,
 				sensor_r_out	=>	sensor_r);
+
+M1: mine_sensor_top port map (	clk		=>	clk,
+				mine_sensor_in	=> 	sensor_mine_in,
+				mine_out 	=> 	mine_out_signal);
 
 
 -- UART groepje editen en checken graag.
@@ -160,7 +171,7 @@ LB2: controller port map(
 --new inputs
 				data_in			=> 	data_uoci,
 				data_ready		=> 	data_ready_sig, 
-				mine_s			=> 	'0',  --port map naar sensor signal
+				mine_s			=> 	mine_out_signal,
 
 
 --new outputs
