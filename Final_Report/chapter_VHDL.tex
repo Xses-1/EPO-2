@@ -1,0 +1,68 @@
+\chapter{VHDL}
+%%TA zei dat het ook mogelijk is om linefollower toe te voegen in epo2, bijv een beschrijving van hoe je de linefollower hebt aangepakt en hoe je hebt getest en geverifieerd dmv testbench.
+
+\section{1. The line follower}
+Remember the process you did to understand the operation: creating a time base, testing the effect of the PWM, use the inputs of the light sensitive sensors and defining an FSM to control the process.
+Translate this process in a concise way, avoiding repetition to the manual content, in a chapter describing: Requirements, Design, Implementation and Testing phase.
+
+\textbf{Line follower}
+the frequency of the clock is 50MHZ, which means that the tril
+
+\textbf{Light-sensitive sensors}
+%Chantal: use the inputs of the light-sensitive sensors manual LF p6
+Light-sensitive sensors need to be used to detect what the robot observes. The light-sensitive sensors measure the reflection from the ground. Their circuit can set the output to '0' or '1', respectively black and white. With the sensor output a VHDL code can be written so that the robot can detect what they need to do based on what he observes. For example when the robot observes '110', white white black, with the light-sensitive sensors and he got the task to go forward. Then the robot will correct himself and turn gently left till he observes '010', white black white.\\
+
+\textbf{Time Base}
+%%Chantal: PWM and the 20-bit vector for counter LF manual p8 and creating a time base p38
+A time base needs to be created for the robot to measure the time within a period of the pulse width module (PWM) signal. The PWM signals control the server motors and is therefore used for the motion of the robot. To get the right PWM signals a counter consisting of 20 bits needs to be used. Since the general clock has a counter of MHz and the PWM sends a pulse every 20 milliseconds. 
+\textbf{Inputbuffer}
+
+\textbf{Controller}
+
+
+\textbf{Motor controll}
+
+\\
+\\
+
+
+\textbf{Changes made for a mine detector robot}
+
+\textbf{Adapted controller from the line follower}
+%Chantal: testing the effect of the PWM  (maybe bij testing) manual LF p7
+The robot needs to turn 90 degrees when they get the order to turn left or right. To get the closest turn to 90 degrees a test code, based on the line follower code, has been written and executed. With trial and error a PWM of .... milliseconds has been chosen. \\
+
+For the correct movements of the robot, the final state machine of the line follower needs to be expanded. This final state diagram only implements what the robot needs to execute when receiving a code from the PC. Therefore, the C-code will become the brain of the system and VHDL will solely follow its order. The communication between the C-code and the VHDL is described in chapter \ref{chapter_communication}. Only when the robot is riding forward, meaning that the robot is in the forward\textunderscore{state}, the robot will follow and correct the line.\\
+
+The following final state machine has been implemented: \\
+%% figuur FSD
+
+The VHDL code for the final state machine in figure %verwijzing naar figuur%
+has been described in Appendix \ref{appendix_linefollower}
+\\
+
+%mogelijke opmaak zie manual
+\section{Introduction}
+In this project, the robot must be able to drive forward, turn left and right. This is achievable by sending the correct PWM signals to the robot. Therefore, a Final State Diagram with accurate output signals must be designed.
+
+\section{The requirements}
+
+\section{Design}
+
+\section{Implementation}
+
+%%Eojin
+In the given manual \cite{EPO2_manual} there are two (optional) example approaches. The first approach is expanding the FSM of the line follower (A project that had to be completed in pairs before EPO 2 began). This has its pro's and cons: 
+\\
+
+
+Het idee:
+1. FSD tekenen met de requirements
+2. VHDL code schrijven aan de FSD
+3. Debuggen zo mogelijk
+4. Samenvoegen met C en dan verwijzing naar communication.
+5. Testing the PWM, hoe veel moet hij naar links en naar rechts.
+
+\section{Testing phase}
+
+There have been some trials and errors in the VHDL code. %uitleg wat er fout ging

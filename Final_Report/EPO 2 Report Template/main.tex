@@ -1,0 +1,162 @@
+\documentclass[whitelogo,oneside]{TUD-report2020}
+\setcounter{secnumdepth}{3}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{soul}
+\usepackage{biblatex}
+\addbibresource{report.bib}
+\usepackage{multicol}
+\usepackage{csquotes}
+\usepackage{parskip}
+
+
+
+
+\usepackage{longtable}
+\usepackage{makecell}
+
+\usepackage{changes}
+
+
+\usepackage{graphicx}
+\usepackage[justification=centering]{caption}
+
+%For VHDL code
+\usepackage{listings}      % For typesetting code
+\usepackage{xcolor}        % For custom colors
+\usepackage{courier}       % For a monospaced font
+
+
+
+
+
+
+
+
+
+\begin{document}
+
+
+%% for VHDL code
+\lstdefinestyle{vhdlStyle}{
+    language=VHDL,
+    basicstyle=\footnotesize\ttfamily,
+    keywordstyle=\color{blue},
+    commentstyle=\color{green!40!black},
+    stringstyle=\color{orange},
+    showstringspaces=false,
+    morekeywords={library,use,all,entity,is,port,in,out,end,architecture,of,begin,and,or,not,if,then,else,elsif,when,case,with,select,others,signal}
+}
+
+% Customized VHDL code environment
+\newenvironment{vhdlcode}
+{\lstset{style=vhdlStyle}}
+{}
+
+%% Use Roman numerals for the page numbers of the title pages and table of
+%% contents.
+\frontmatter
+
+%% Uncomment following 19 lines for a cover with a picture on the lower half only
+\title[tudelft-black]{\Huge{EPO 2 Final Report}}
+
+\author[tudelft-white]{\Large{
+Chantal Chen \\ 
+Thijs van Esch \\ 
+Eojin Lim \\ 
+Pieter Olyslaegers \\
+Kevin Pang \\ 
+Darren van de Pol \\
+Wilson Rong \\ 
+Maximiliaan Sobry \\ 
+Wiktor Tomanek \\ \\
+Supervisor: Dr. ir. Arjan van Genderen \\
+TA: Nassim Beladel, Ian van Ingen, Daniel Paassen \\ \\
+Electrical Engineering BSc\\
+DATE, 2023\\}}
+\affiliation{Technische Universiteit Delft}
+\coverimage{tank.jpg}
+\titleoffsetx{5cm}
+\titleoffsety{22cm}
+\afiloffsetx{1cm}
+\afiloffsety{10cm}
+\covertext[tudelft-white]{
+    \textbf{Cover Text} \\
+    possibly \\
+    spanning 
+    multiple 
+    lines
+    \vfill
+    ISBN 000-00-0000-000-0
+}
+\makecover
+
+%% Uncomment following 16 lines for a cover with a picture on the lower half only
+%\title[tudelft-white]{\Huge{EPO 2 Final Report}}
+
+%\author[tudelft-white]{\Large{
+%Chantal Chen \\ 
+%Thijs van Esch \\ 
+%Eojin Lim \\ 
+%Pieter Olyslaegers \\
+%Kevin Pang \\ 
+%Darren van de Pol \\
+%Wilson Rong \\ 
+%Maximiliaan Sobry \\ 
+%Wiktor Tomanek \\ \\
+%Supervisor: Dr. ir. Arjan van Genderen \\
+%TA: Nassim Beladel, Ian van Ingen, Daniel Paassen %\\ \\
+%Electrical Engineering BSc\\
+%DATE, 2023\\}}
+
+%\affiliation{Technische Universiteit Delft}
+% \coverimage{tank.jpg}
+% \covertext[tudelft-white]{
+%     \textbf{Cover Text} \\
+%     possibly \\
+%     spanning 
+%     multiple 
+%     lines
+%     \vfill
+%     % ISBN 000-00-0000-000-0
+% }
+%\setpagecolor{tudelft-cyan}
+%\makecover%[split]
+
+
+%% Include an optional title page.
+% \input{title}
+
+% \input{preface}
+
+\tableofcontents
+
+%% Use Arabic numerals for the page numbers of the chapters.
+\mainmatter
+\iffalse
+\input{chapter-0} %Remove this chapter
+\input{chapter-1}
+\input{chapter-2}
+\input{chapter-3}
+\input{chapter-4}
+\input{chapter-5}
+\input{chapter-6}
+\fi
+
+\input{Introduction}
+\input{chapter_mine_sensor}
+\input{chapter_C}
+\input{chapter_VHDL}
+\input{chapter_communication}
+\input{conclusion}
+\input{Notes}
+
+%% Use letters for the chapter numbers of the appendices.
+\appendix
+\input{Appendix_LF}
+\printbibliography
+
+
+
+\end{document}
+

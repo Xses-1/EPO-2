@@ -1,0 +1,25 @@
+\chapter{Notes}
+
+08-05-2023
+
+C group came with a suggestion to become the brain of our system and let VHDL solely follow its order. This will lead to two advantages: It is easier to perform the same task if the task is written in C than in VHDL and the FSM of VHDL decreases a lot, which leads to less work for the VHDL group. Needless to say, everyone agreed to implement this suggestion and more is explained in the chapter VHDL or C (must be decided yet) \newline
+
+
+11-05-2023
+The VHDL team forgot to add a mine-reset state in their FSM. After discussing with C and sensor group, it was decided that the sensor group will add a timer to their own written FSM, which ensures that the signal is 1 for 40ms when a mine is detected by the mine sensor. That signal is sent to the PC , which in turn will return a signal that contains the order to make a U-turn, to the VHDL.It is better that transmission of mine-detection is between C and sensors because C is much faster  than VHDL.
+
+Looking back, the original FSM contained unnecessary states (the check states). By removing them, this will lead to less usage of states, which will make the robot faster. This is possible because the robot can read and write in the same state. It was not previously considered that the robot could execute motor commands and write to the Xbee simultanously. 
+
+
+
+2023-05-15
+Testing Communication: 
+The robot stopped when C language had given a stop signal and a forward signal respectively during the communication between C language and VHDL.
+
+-> missing newstate
+
+sensorlmr worden niet goed assigned bij de stdlogicvector die naar de C-code wordt gestuurd
+-> new fsd state met de hoop dat ie het doet
+
+2023-06-01
+De VHDL code switched te snel van state, het loopt niet 20 ms in de state. Hierdoor gaat hij te snel naar de volgende state en heeft hij niet genoeg tijd te lezen.

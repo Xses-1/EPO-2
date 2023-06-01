@@ -1,0 +1,84 @@
+\chapter{ Specific Requirements for EE1L21 final report}
+
+  
+
+  The final report is a design report, and should adhere to the typical structure of a design report as introduced above. In addition, the overall design consists of a number of subsystems, that must be documented themselves. As such, a two-level recursive structure of the design report is in order, with an overall structure with an introduction, requirements etc for the top level design. Then, each sub-system can be described in a dedicated chapter in the main body, where each of these chapters shows a design-report-structure for the sub-system being described in that chapter. As such, a good report structure typically contains the sections as indicated in the following list:
+
+\begin{enumerate}
+\item  Introduction
+
+\item  Main body
+
+\item  Conclusions and Recommendations (usually combined in one section)
+
+\item  References
+
+\item  Appendices
+\end{enumerate}
+
+  
+
+
+\subsection{ The Introduction}
+
+  
+
+  The introduction should provide a general overview, describing the problem which is targeted. The aims and objectives of the report should be explained in detail. A good introduction can contain:
+
+\begin{enumerate}
+\item  \textit{The problem statement }and \textit{requirements specification }in its wider context. If appropriate, the introduction defines the key concepts required by the reader to understand the report.
+
+\item  \textit{A brief overview }of the methodology or the procedures followed.
+
+\item  \textit{The outline }of the report with explicit reference to the different chapters and/or sections.
+\end{enumerate}
+
+  
+
+
+\subsection{ The Main Body}
+
+  
+
+  The body of the report typically contains a number of subsections. These sections depend on the nature of the work, in the specific case of the EPO2 project since different modules are being developed, a reasonable list of chapters can be the following:
+
+\begin{enumerate}
+
+\item The line follower
+
+  Remember the process you did to understand the operation: creating a time base, testing the effect of the PWM, use the inputs of the light sensitive sensors and defining an FSM to control the process. Translate this process in a concise way, avoiding repetition to the manual content, in a chapter describing: \textit{Requirements, Design, Implementation and Testing phase}.
+
+\item The wireless communication module
+
+  Give a top level view of the operation of the wireless link. Describe the protocol and the error recovery measures (in case implemented). Describe eventual test-benches that were used and the testing procedure with the robot to validate the proper operation of the link.
+
+\item  The mine detector  
+
+  Motivate the choices between C and L detector. Describe at a circuit level the topology used and its operation. Do not forget to show the simulation of your circuit and compare it to the measurement results. Describe your extension for the detect mine. Describe at a circuit level the mine sensor topology used and its operation. Do not forget to show the simulation of your circuit. Describe your VHDL code extension for the detection of the mine. Describe at a circuit level the mine sensor topology used and its operation. 
+
+\item The route planner on the PC (only in final report)
+
+  Describe how the route planner on the PC works, detail the algorithms you have implemented to complete the various challenges (i.e., A, B and possibly C) (note if the section becomes too lengthy can be added in the appendix).
+
+\item The robot controller on the FPGA  
+
+  Describe the way the controller navigates the robot through the maze using the inputs from the sensors (mine and light sensitive sensor) and the information received from the route planner. Also how the data are transmitted between the PC and robot. Be accurate in the usage of fine state diagrams. Report the test protocols you have used to validate the proper functioning of the robot.
+
+\item Test results of the robot performance in the challenges 
+
+  Approach and report on the test plan in a scientific way, be precise in the reporting of numerical data (number of digits, accuracy, etc.).
+
+ 
+\end{enumerate}
+
+
+\subsection{The Conclusion and Other Sections}
+  The \textit{Conclusions } section of a project report is different than that of the conclusion of an essay. In this section, no new information is provided, but instead, the findings of the research project is recapitulated with a discussion on their implications. The section must clearly indicate to what extent the design requirements were eventually realized and reflect on possible design goals that were not met. A short summary of the analytical, simulated results may also be given here. The \textit{Recommendations }must highlight the strategies to improve the obtained performance. The account in this section must focus on the technical results and approaches, and leave out strictly process related aspects. The \textit{References }and \textit{Appendices }must comply with the instructions given above. The list of references must include the cited references, only. The list is compiled in the sequence of citations.
+
+  
+
+
+
+
+
+

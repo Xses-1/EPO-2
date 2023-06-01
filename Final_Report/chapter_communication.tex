@@ -1,0 +1,132 @@
+\chapter{Communication}
+\label{chapter_communication}
+
+%% Zie github
+%requirements see manual
+\textbf{The wireless communication module} 
+ Give a top level view of the operation of the wireless link. Describe the protocol and the error recovery measures (in case implemented). Describe eventual test-benches that were used and the testing procedure with the robot to validate the proper operation of the link.
+
+
+\textbf{The robot controller on the FPGA}
+Describe the way the controller navigates the robot through the maze using the inputs from the sensors (mine and light sensitive sensor) and the information received from the route planner. Also how the data are transmitted between the PC and robot. Be accurate in the usage of fine state diagrams. Report the test protocols you have used to validate the proper functioning of the robot.
+
+%mogelijke opmaak zie manual
+\section{Introduction}
+
+In order to ensure that the robot can receive the right order, there must be communication between the C and the VHDL-code. The C-code can be seen as the brain and the VHDL-code as the body of our system.
+
+
+\section{The requirements}
+
+\section{The followed design methodology}
+%%Misschien hier nog een short introtje erbij ofz
+%%Chantal: vgm hoort het stuk van Thijs op Github bij dit stukje maar ik weet dat niet zeker
+
+\subsection{Communication between robot and controller}
+In this EPO-2 project, it is decided that the programming language C is the brain and VHDL the body of our system. This section contains the technical description of the communication between the robot (controlled by the FSM created by VHDL team) and the controller (an application in C programming language running on a desktop written by C team).
+
+\textbf{\subsubsection{Send data or receive data?}}
+This section describes when to read or receive data from the perspective of the robot. This means that data sent by the
+robot to the desktop will be referred as 'outgoing data' and data sent by the controller to the robot will be 
+referred as 'incoming data'.
+
+
+The following flowchart described when both the robot and the control should send byte and when they should expect to
+receive a byte.
+
+%%Foto Images/commination.png (Thijs, zie Github)
+
+Both the controller and robot have to send one byte and receive one byte per cycle. The controller is the entity that
+sends the first byte. For every byte sent by the controller to the robot, the robot should send a byte back to the controller, before the robot executes the byte from the controller. This way, the controller knows that the byte is received well by the robot. By doing this, the chances of miscommunication between controller and robot decreases enormously, which will lead to a proper end product.
+
+\textbf{\subsubsection{Incoming data}}
+This section describes the format of the incoming data byte. This byte is sent by the controller to the robot.
+
+Only the three least significant bits (bits 2, 1 and 0) contain data. The remaining five bits always have the value 
+'0'. The three bits that actually contain data represent the opcode of the operation that the robot should execute.
+All possible combinations of these bits with the corresponding operations are listed in the table below.
+
+\begin{longtable}[c]{| c | c | c |}
+        \hline
+        \textbf{Operation} & \textbf{Opcode} & \textbf{Meaning} \\
+        \hline
+        `ROBOT\textunderscore{NOOP}` & 000 & The robot should keep doing what it was already doing.\\
+        \hline
+        `ROBOT\textunderscore{LEFT}` & 001 & The robot should start rotating to the left.\\
+        \hline
+        `ROBOT\textunderscore{RIGHT}` & 010 & The robot should start moving to the right.\\
+        \hline
+        `ROBOT\textunderscore{FORWARD}` & 011 & The robot should start moving forward.\\
+        \hline
+        `ROBOT\textunderscore{STOP}` & 100 & The robot should stop rotating or moving forward. It should come to a stop. \\
+        \hline
+        - & 101 & Illicit opcode.\\
+        \hline
+        - & 110 & Illicit opcode.\\
+        \hline
+        - & 111 & Illicit opcode.\\
+        \hline
+    \captionsetup{justification=centering}
+    \caption{Combination of bits sent from controller to robot \label{bits_controller_to_robot}}\\
+\end{longtable}
+
+\textbf{\subsubsection{Operation priority}}
+The robot may assume that after a `ROBOT\textunderscore{LEFT}`, `ROBOT\textunderscore{RIGHT}` or a `ROBOT\textunderscore{FORWARD}` has been sent, the next operation
+that is not `ROBOT\textunderscore{NOOP}` will always be `ROBOT\textunderscore{STOP}`. 
+
+In other words, the robot is assumed to always be in a state of not doing anything when 'ROBOT\textunderscore{LEFT}`, `ROBOT\textunderscore{RIGHT}` 
+or `ROBOT\textunderscore{FORWARD}` is sent as operation.
+
+\textbf{\subsubsection{Outgoing data}}
+This section describes the format of the outgoing data byte. This is the byte that is sent by the robot to the
+controller. This byte is to be sent exactly once after each time an incoming data byte is read.
+
+Each bit in the outgoing data byte indicates a piece of data. The meaning of each bit is described in the table below.
+
+\begin{longtable}[c]{| c | c | c |}
+        \hline
+        \textbf{Position of the bitvector} & \textbf{Name} & \textbf{The binary digit of the bitvector} \\
+        \hline
+        data\textunderscore{out}[7] & rotatingLeft & \makecell[c]{Should equal '1' if the robot is currently rotating to the left,\\ '0' otherwise..}\\
+        \hline
+        data\textunderscore{out}[6] & rotatingRight & \makecell[c]{Should equal '1' if the robot is currently rotating to the right,\\ '0' otherwise.}\\
+        \hline
+        data\textunderscore{out}[5] & isDriving & \makecell[c]{Should equal '1' if the robot is \\currently rotating or the robot is moving forward.}\\
+        \hline
+        data\textunderscore{out}[4] & sensorLeft & Should equal the value outputted by the left line sensor.\\
+        \hline
+        data\textunderscore{out}[3] & sensorMiddle & Should equal the value outputted by the middle line sensor. \\
+        \hline
+        data\textunderscore{out}[2] & sensorRight & Should equal the value outputted by the right line sensor. \\
+        \hline
+        data\textunderscore{out}[1] & mineDetected & \makecell[c]{Should equal '1' if the robot is currently detecting a mine,\\ '0' otherwise.}\\
+        \hline
+        data\textunderscore{out}[0] & readBit & \makecell[c]{Should equal '1' if the data contained \\within the rest of the byte is to be read.}\\
+        \hline
+    \captionsetup{justification=centering}
+    \caption{Feature represented by the position of the data\textunderscore{out}-vector \label{scheme_data_out_vector}}\\
+\end{longtable}
+
+\textbf{\subsubsection{Sensor data}}
+Bits 4, 3 and 2 contain the left, middle and right line sensor values, respectively. The controller interprets the
+meaning of the values of these bits as follows.
+
+If such a bit has value '0', the controller assumes that the corresponding sensor is currently detecting a line. If
+such a bit has value '1', the controller assumes that no line is detected.
+
+\textbf{\subsubsection{The readBit}}
+The controller always desires to read the byte that was sent by the robot. When the readBit is 1, this means that the controller reads the byte sent by the robot. 
+
+After the VHDL receives a signal from C-code, it will follow the order contained in the signal by going to the appropriate case. Following the same example, only the VHDL-code written in the case forward (described in the FSD) will be executed. After receiving the confirmation signal, the C-code will -- milliseconds in order that the VHDL code can execute the case which has been given by the signal. 
+%% aantal ms moet nog worden gegeven door C
+
+\section{Implementation}
+
+\section{The testing phase}
+After the C-code and VHDL-code was written, it was tested if the robot worked correctly. The biggest problem that was encountered was that not the right std\textunderscore{logic}\textunderscore{vector} was sent back to the controller.
+
+To solve this problem, the FSD was changed to meet the requirements for better communication between controller and the robot. The changes involve ...
+
+
+
+Also a few small problems were encountered as forgetting a new\textunderscore{state} in the VHDL-code.
