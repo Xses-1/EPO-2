@@ -27,6 +27,8 @@ set(    SOURCES
         Control/communication.c
         Control/communication.h)
 
+#add_compile_definitions(DEBUG_SERIAL)
+
 ### Main application
 add_executable(EPO2 main.c ${SOURCES})
 

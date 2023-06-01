@@ -104,7 +104,15 @@ int readData(uint8_t *data, size_t bytes)
 		    -> return error code -11 */
 		return -11;
 	}
+#ifdef DEBUG_SERIAL
+	LPDWORD bytesRead = (LPDWORD) malloc(sizeof(DWORD));
+	int error = !ReadFile(hSerial, data, bytes, bytesRead, NULL);
+	printf(" ### bytes read: %lu\n", *bytesRead);
+	free(bytesRead);
+	return error;
+#else
 	return !ReadFile(hSerial, data, bytes, NULL, NULL);
+#endif
 }
 
 int writeData(const uint8_t *data, size_t bytes)
@@ -115,7 +123,15 @@ int writeData(const uint8_t *data, size_t bytes)
 		    -> return error code -13 */
 		return -13;
 	}
+#ifdef DEBUG_SERIAL
+	LPDWORD bytesWritten = (LPDWORD) malloc(sizeof(DWORD));
+	int error = !WriteFile(hSerial, data, bytes, bytesWritten, NULL);
+	printf(" ### bytes written: %lu\n", *bytesWritten);
+	free(bytesWritten);
+	return error;
+#else
 	return !WriteFile(hSerial, data, bytes, NULL, NULL);
+#endif
 }
 
 int closeSio()

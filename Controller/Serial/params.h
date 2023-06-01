@@ -12,7 +12,7 @@
 # 	define BYTESIZE 8
 #	define PARITY NOPARITY
 # 	define STOPBITS ONESTOPBIT
-#	define PORT "COM3"
+#	define PORT "COM5"
 #else
 #	define BAUD B9600
 # 	define BYTESIZE 8
