@@ -1,3 +1,18 @@
+/* That is ture that this approach makes everything a lot simpler however
+ * the way you implemented it is even less though out than the last one.
+ * The code is poorly written and very buggy. I stopped looking for bugs 
+ * after the fifth one (not counting the lack of reset that I told you about).
+ * Some of those issues are the exactly same thing that you did last time.
+ *
+ * On top of that this code would require Thijs to change a lot.
+ *
+ * Also WTF is going on with this code looking like trash? Fix your indents
+ * and shit. The last one was bad, but this is truely awful.
+*/
+
+
+
+
 library IEEE;
 use IEEE.std_logic_1164.all;
 use IEEE.numeric_std.all;
@@ -255,6 +270,10 @@ begin
 				read_data <= '0';
 				data_out <= "00000000";
 
+				-- WTF is this? Why you have two u-turn states that are exactly the same
+				-- and on of them not gonna do anything, but fall to the other one
+				-- after one clock cycle?
+
 				new_state <= state_u_2;
 
 		when state_u_2 =>
@@ -352,6 +371,8 @@ begin
 
 -- vanaf hier moeten we weer code terugsturen naar C, welke data moeten we terugzenden?
 -- bbb state
+					-- There's nothing that points to this state
+					-- Also WTF is going on with those indentations?
 		when state_bbb1 =>
 			count_reset <= '0';
 			motor_l_reset <= '0';
@@ -364,6 +385,7 @@ begin
 			read_data <= '0';
 
 
+			--You still have to send line sensors data to him.
 	-- welke code moeten we terugsturen naar Thijs?
 			data_out 		<= "00000000";
 
@@ -397,6 +419,9 @@ begin
 
 	-- welke code moeten we terugsturen naar Thijs?
 					data_out 		<= "00000000";
+
+					-- This is Bullshit, so you stay here only for one 20ms cycle?
+					-- Motors won't even react.
 
 					if (unsigned(count_in) < to_unsigned(1000000, 20)) then
 						new_state <= state_gl_d;
@@ -498,6 +523,7 @@ begin
 					end if;
 					
 --- bbb stop
+					-- WTF is this state???
 		when state_s_d =>
 		count_reset		<= '1';
 		motor_l_reset		<= '1';
