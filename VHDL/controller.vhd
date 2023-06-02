@@ -1,3 +1,20 @@
+-- 1.) UART communication seems to not work
+-- 2.) Timebase has to resets itself if (count >= 20ms), but it also
+--	resets when the reset signals comes in, so the controller stops it.
+--	It also sends a new reset signal to the motorcontrollers, every 20ms,
+--	so they don't have to be reset perioidically by the controller.
+-- 3.) 	Line follower needs to react to the sensors to go back to the previous
+--	state - forward. See comments below.
+-- 4.)	values of the reset signals below has to be changed, because now you only
+--	use them to stop the motors if needed and reset everything at the beggining,
+--	not for the periodical reset.For example, you stop motors in the stop state
+--	and in the gentle stop state.
+-- 5.)  Also check the values of the motor direction signals.
+
+
+
+
+
 library IEEE;
 use IEEE.std_logic_1164.all;
 use IEEE.numeric_std.all;
@@ -24,13 +41,13 @@ entity controller is
 		data_out		: out	std_logic_vector (7 downto 0);	
 		write_data		: out	std_logic;
 		read_data		: out	std_logic;
---		
-		count_reset		: out	std_logic;
 
-		motor_l_reset		: out	std_logic;
+		count_reset		: out 	std_logic;
+
+		motor_l_reset		: out 	std_logic;
+		motor_r_reset		: out 	std_logic;
+
 		motor_l_direction	: out	std_logic;
-
-		motor_r_reset		: out	std_logic;
 		motor_r_direction	: out	std_logic
 	);
 
@@ -66,7 +83,7 @@ begin
 		when state_r =>		count_reset <= '1';							
 					motor_l_reset <= '1';
 					motor_r_reset <= '1';
-
+					
 					motor_l_direction <= '0';
 					motor_r_direction <= '0';
 
@@ -93,7 +110,7 @@ begin
 		when state_reset_read=>		count_reset <= '1';							
 						motor_l_reset <= '1';
 						motor_r_reset <= '1';
-	
+
 						motor_l_direction <= '0';
 						motor_r_direction <= '0';
 
@@ -126,7 +143,7 @@ begin
 		when state_s_write =>		count_reset		<= '1';
 						motor_l_reset		<= '1';
 						motor_r_reset		<= '1';
-
+						
 						motor_l_direction	<= '0';
 						motor_r_direction	<= '0';
 
@@ -142,17 +159,17 @@ begin
 						write_data		<= '1';
 						read_data		<= '0';
 
-	                             	if (unsigned(count_in) < to_unsigned(1000000, 20)) then
+	                             	if (data_ready = '0') then
 						new_state <= state_s_write;
 							
-					elsif (unsigned(count_in) >= to_unsigned(1000000, 20)) then	--Is het beter om te loopen hierin (zoals
-						new_state <= state_s_read;				-- in de state_f_write) of eerst naar state_s_read te gaan? en als data = 0 dan weer terug?
+					else
+						new_state <= state_s_read;
 		
 					end if;
 
-		when state_s_read =>	count_reset		<= '1';		--state s read, als geen data dan gwn terug naar stop_s_write, 
-					motor_l_reset		<= '1';		--is dit de state waar we na reset meteen heen gaan?
-					motor_r_reset		<= '1';	
+		when state_s_read =>	count_reset		<= '1';
+					motor_l_reset		<= '1';
+					motor_r_reset		<= '1';
 
 					motor_l_direction	<= '0';
 					motor_r_direction	<= '0';
@@ -162,10 +179,8 @@ begin
 					write_data <= '0';
 					read_data <= '1';
 
-					if (data_ready = '0') then
-						new_state <= state_s_write;
 
-					elsif (data_in = "00000001") then			
+					if (data_in = "00000001") then			
 						new_state <= state_gl_d;
 
 					elsif (data_in = "00000010") then
@@ -187,6 +202,7 @@ begin
 		when state_gl_d =>	count_reset		<= '0';
 					motor_l_reset		<= '1';
 					motor_r_reset		<= '0';
+
 					motor_l_direction	<= '0';
 					motor_r_direction	<= '0'; 
 
@@ -202,6 +218,8 @@ begin
 					write_data		<= '1';
 					read_data		<= '0'; 
 
+					-- This has to be changed so the robot goes to the sharp turn
+					-- when sensors are detecting the line again
 					if (unsigned(count_in) < to_unsigned(1000000, 20)) then
 						new_state <= state_gl_d;
 							
@@ -213,6 +231,7 @@ begin
 		when state_sl_d =>	count_reset		<= '0';
 					motor_l_reset		<= '0';
 					motor_r_reset		<= '0';
+
 					motor_l_direction	<= '0';
 					motor_r_direction	<= '0';
 
@@ -220,10 +239,10 @@ begin
 					write_data		<= '0';
 					read_data		<= '0'; 
 					
-					if (unsigned(count_in) < to_unsigned(1000000, 20)) then
+					if (data_ready = '0') then
 						new_state <= state_sl_d;
 							
-					elsif (unsigned(count_in) >= to_unsigned(1000000, 20)) then
+					else
 						new_state <= state_l_read;
 		
 					end if;
@@ -231,7 +250,7 @@ begin
 		when state_l_read =>	count_reset		<= '1';		 
 					motor_l_reset		<= '1';		
 					motor_r_reset		<= '1';	
-
+					
 					motor_l_direction	<= '0';
 					motor_r_direction	<= '0';
 
@@ -239,10 +258,7 @@ begin
 					write_data 		<= '0';
 					read_data 		<= '1';
 
-					if (data_ready = '0') then
-						new_state <= state_gl_d;
-
-					elsif (data_in = "00000001") then			
+					if (data_in = "00000001") then			
 						new_state <= state_gl_d;
 
 					elsif (data_in = "00000010") then
@@ -259,8 +275,7 @@ begin
 
 
 -- right branch door data van thijs, bestaande uit state_gr_d, state_sr_d, state_r_read.
-		when state_gr_d  => 
-					count_reset <= '0';
+		when state_gr_d  => 	count_reset <= '0';
 					motor_l_reset <= '0';
 					motor_r_reset <= '1';
 
@@ -279,6 +294,8 @@ begin
 					write_data <= '1';
 					read_data <= '0';
 				
+				-- This has to be changed so the robot goes to the sharp turn
+				-- when sensors are detecting the line again
 				if (unsigned(count_in) < to_unsigned(1000000, 20)) then
 					new_state <= state_gr_d;
 					
@@ -300,10 +317,10 @@ begin
 					write_data <= '0';
 					read_data <= '0';
 					
-				if (unsigned(count_in) < to_unsigned(1000000, 20)) then
+				if (data_ready = '0') then
 					new_state <= state_sr_d;
 					
-				elsif (unsigned(count_in) >= to_unsigned(1000000, 20)) then
+				else
 					new_state <= state_r_read;
 				end if;
 
@@ -319,10 +336,7 @@ begin
 					write_data <= '0';
 					read_data <= '1';
 					
-					if (data_ready = '0') then
-						new_state <= state_gr_d;
-
-					elsif (data_in = "00000001") then			
+					if (data_in = "00000001") then			
 						new_state <= state_gl_d;
 
 					elsif (data_in = "00000010") then
@@ -338,8 +352,7 @@ begin
 					end if;
 
 -- forward branch met state_f_write, state_f_read en de line follower.
-		when state_f_write  => 
-					count_reset <= '0';
+		when state_f_write  => 	count_reset <= '0';
 					motor_l_reset <= '0';
 					motor_r_reset <= '0';
 
@@ -378,7 +391,6 @@ begin
 						new_state <= state_f_write;
 
 					end if;
-		
 		
 
 		when state_f_read =>	count_reset <= '0';
@@ -421,6 +433,10 @@ begin
 				
 					data_out <= "00000000";
 			
+					-- This also has to be changed to react on the signals
+					-- form the sensors
+					-- 
+					-- Same for the ones below 
 				if (unsigned(count_in) < to_unsigned(1000000, 20)) then
 					new_state <= state_gl;
 					
