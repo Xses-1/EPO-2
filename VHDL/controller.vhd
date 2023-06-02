@@ -10,6 +10,11 @@
 --	not for the periodical reset.For example, you stop motors in the stop state
 --	and in the gentle stop state.
 -- 5.)  Also check the values of the motor direction signals.
+-- 6.)	U turn is now also broken, so the gentle left/right and sharp left/right 
+--	has to be separated the same way as the rest of the states is, with the
+--	separate read, write states.
+-- 7.)	C code hast to also be now adjusted for the U-turn and you also need new
+--	opcode naturally.
 
 
 
