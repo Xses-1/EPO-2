@@ -25,7 +25,6 @@
 
 
 
-
 library IEEE;
 use IEEE.std_logic_1164.all;
 use IEEE.numeric_std.all;
@@ -52,14 +51,15 @@ entity controller is
 		data_out		: out	std_logic_vector (7 downto 0);	
 		write_data		: out	std_logic;
 		read_data		: out	std_logic;
+--		
+		count_reset		: out	std_logic;
 
-		count_reset		: out 	std_logic;
-
-		motor_l_reset		: out 	std_logic;
-		motor_r_reset		: out 	std_logic;
-
+		motor_l_reset		: out	std_logic;
 		motor_l_direction	: out	std_logic;
+
+		motor_r_reset		: out	std_logic;
 		motor_r_direction	: out	std_logic
+		
 	);
 
 end entity controller;
@@ -68,8 +68,8 @@ architecture behavioural of controller is
 	
 	type controller_state is	(state_r, state_reset_read,
 					 state_s_write, state_s_read,										
-					 state_gl_d, state_sl_d, state_l_read,								
-					 state_gr_d, state_sr_d, state_r_read,								
+					 state_gl_d, state_gl_d_2, --state_sl_d, state_l_read,								
+					 state_gr_d, state_gr_d_2, --state_sr_d, state_r_read,								
 					 state_f_write, state_f_read, state_gl, state_sl, state_gr, state_sr);											
 
 	signal state, new_state: controller_state;
@@ -94,21 +94,30 @@ begin
 		when state_r =>		count_reset <= '1';							
 					motor_l_reset <= '1';
 					motor_r_reset <= '1';
-					
+
 					motor_l_direction <= '0';
 					motor_r_direction <= '0';
 
 					write_data <= '1';
 					read_data <= '0';
+					
+					data_out(7)	<= '1';
+					data_out(6)	<=	'1';
+					data_out(5)	<=	'1';
+					data_out(4)	<=	'1';
+					data_out(3) <=	'1';
+					data_out(2)	<=	'1';
+					data_out(1)	<=	'1';
+					data_out(0)	<=	'1';
 
-					data_out(7)		<= '0';
-					data_out(6)		<= '0';
-					data_out(5)		<= '0';
-					data_out(4)		<= sensor_l;
-					data_out(3)		<= sensor_m;
-					data_out(2)		<= sensor_r;
-					data_out(1)		<= mine_s;
-					data_out(0)		<= '1';
+					--data_out(7)		<= '0';
+					--data_out(6)		<= '0';
+					--data_out(5)		<= '0';
+					--data_out(4)		<= sensor_l;
+					--data_out(3)		<= sensor_m;
+					--data_out(2)		<= sensor_r;
+					--data_out(1)		<= mine_s;
+					--data_out(0)		<= '1';
 					
 				if (data_ready = '1') then
 					new_state <= state_reset_read;
@@ -121,7 +130,7 @@ begin
 		when state_reset_read=>		count_reset <= '1';							
 						motor_l_reset <= '1';
 						motor_r_reset <= '1';
-
+	
 						motor_l_direction <= '0';
 						motor_r_direction <= '0';
 
@@ -154,7 +163,7 @@ begin
 		when state_s_write =>		count_reset		<= '1';
 						motor_l_reset		<= '1';
 						motor_r_reset		<= '1';
-						
+
 						motor_l_direction	<= '0';
 						motor_r_direction	<= '0';
 
@@ -170,17 +179,17 @@ begin
 						write_data		<= '1';
 						read_data		<= '0';
 
-	                             	if (data_ready = '0') then
+	                             	if (unsigned(count_in) < to_unsigned(1000000, 20)) then
 						new_state <= state_s_write;
 							
-					else
-						new_state <= state_s_read;
+					elsif (unsigned(count_in) >= to_unsigned(1000000, 20)) then	--Is het beter om te loopen hierin (zoals
+						new_state <= state_s_read;				-- in de state_f_write) of eerst naar state_s_read te gaan? en als data = 0 dan weer terug?
 		
 					end if;
 
-		when state_s_read =>	count_reset		<= '1';
-					motor_l_reset		<= '1';
-					motor_r_reset		<= '1';
+		when state_s_read =>	count_reset		<= '1';		--state s read, als geen data dan gwn terug naar stop_s_write, 
+					motor_l_reset		<= '1';		--is dit de state waar we na reset meteen heen gaan?
+					motor_r_reset		<= '1';	
 
 					motor_l_direction	<= '0';
 					motor_r_direction	<= '0';
@@ -190,8 +199,10 @@ begin
 					write_data <= '0';
 					read_data <= '1';
 
+					if (data_ready = '0') then
+						new_state <= state_s_write;
 
-					if (data_in = "00000001") then			
+					elsif (data_in = "00000001") then			
 						new_state <= state_gl_d;
 
 					elsif (data_in = "00000010") then
@@ -208,12 +219,11 @@ begin
 
 				
 
--- left branch door data van thijs, bestaande uit state_gl_d, state_sl_d en state_l_read.
+-- left branch door data van thijs, bestaande uit state_gl_d, state_gl_d_2      We need to make sure the robot turns early enough so lmr = 001 when we encounter the line again.
 		
 		when state_gl_d =>	count_reset		<= '0';
 					motor_l_reset		<= '1';
 					motor_r_reset		<= '0';
-
 					motor_l_direction	<= '0';
 					motor_r_direction	<= '0'; 
 
@@ -229,64 +239,100 @@ begin
 					write_data		<= '1';
 					read_data		<= '0'; 
 
-					-- This has to be changed so the robot goes to the sharp turn
-					-- when sensors are detecting the line again
-					if (unsigned(count_in) < to_unsigned(1000000, 20)) then
-						new_state <= state_gl_d;
+					--if (unsigned(count_in) < to_unsigned(1000000, 20)) then
+						--new_state <= state_gl_d;
 							
-					elsif (unsigned(count_in) >= to_unsigned(1000000, 20)) then
-						new_state <= state_sl_d;
+					--elsif (unsigned(count_in) >= to_unsigned(1000000, 20)) then
+						--new_state <= state_sl_d;
+					--end if;
+					
+					if (sensor_l = '0' and sensor_m = '0' and sensor_r = '0') then
+						new_state <= state_gl_d_2;
+					else 
+						new_state <= state_gl_d;
 					end if;
+		
 
-
-		when state_sl_d =>	count_reset		<= '0';
-					motor_l_reset		<= '0';
+		when state_gl_d_2 =>	count_reset		<= '0';
+					motor_l_reset		<= '1';
 					motor_r_reset		<= '0';
-
 					motor_l_direction	<= '0';
-					motor_r_direction	<= '0';
+					motor_r_direction	<= '0'; 
 
-					data_out		<= "00000000";
-					write_data		<= '0';
+					data_out(7)		<= '1';
+					data_out(6)		<= '0';
+					data_out(5)		<= '1';
+					data_out(4)		<= sensor_l;
+					data_out(3)		<= sensor_m;
+					data_out(2)		<= sensor_r;
+					data_out(1)		<= mine_s;
+					data_out(0)		<= '1';
+
+					write_data		<= '1';
 					read_data		<= '0'; 
 					
-					if (data_ready = '0') then
-						new_state <= state_sl_d;
-							
-					else
-						new_state <= state_l_read;
-		
-					end if;
-
-		when state_l_read =>	count_reset		<= '1';		 
-					motor_l_reset		<= '1';		
-					motor_r_reset		<= '1';	
-					
-					motor_l_direction	<= '0';
-					motor_r_direction	<= '0';
-
-					data_out		<= "00000000";
-					write_data 		<= '0';
-					read_data 		<= '1';
-
-					if (data_in = "00000001") then			
-						new_state <= state_gl_d;
-
-					elsif (data_in = "00000010") then
-						new_state <= state_gr_d;
-
-					elsif (data_in = "00000011") then
+					if (sensor_l = '0' and sensor_m = '0' and sensor_r = '1') then
 						new_state <= state_f_write;
-
-					elsif (data_in = "00000100") then
-						new_state <= state_s_write;
-					else
-						new_state <= state_gl_d;
+					else 
+						new_state <= state_gl_d_2;
 					end if;
 
+		
 
--- right branch door data van thijs, bestaande uit state_gr_d, state_sr_d, state_r_read.
-		when state_gr_d  => 	count_reset <= '0';
+
+		--when state_sl_d =>	count_reset		<= '0';			-- Don't need sharp left and l_read anymore, since we go to forward state after a turn.
+					--motor_l_reset		<= '0';
+					--motor_r_reset		<= '0';
+					--motor_l_direction	<= '0';
+					--motor_r_direction	<= '0';
+
+					--data_out		<= "00000000";
+					--write_data		<= '0';
+					--read_data		<= '0'; 
+					
+					--if (unsigned(count_in) < to_unsigned(1000000, 20)) then
+						--new_state <= state_sl_d;
+							
+					---elsif (unsigned(count_in) >= to_unsigned(1000000, 20)) then
+						--new_state <= state_l_read;
+		
+					--end if;
+
+
+
+		--when state_l_read =>	count_reset		<= '1';		 
+					--motor_l_reset		<= '1';		
+					--motor_r_reset		<= '1';	
+
+					--motor_l_direction	<= '0';
+					--motor_r_direction	<= '0';
+
+					--data_out		<= "00000000";
+					--write_data 		<= '0';
+					--read_data 		<= '1';
+
+					--if (data_ready = '0') then
+						--new_state <= state_gl_d;
+
+					--elsif (data_in = "00000001") then			
+						--new_state <= state_gl_d;
+
+					--elsif (data_in = "00000010") then
+						--new_state <= state_gr_d;
+
+					--elsif (data_in = "00000011") then
+						--new_state <= state_f_write;
+
+					--elsif (data_in = "00000100") then
+						--new_state <= state_s_write;
+					--else
+						--new_state <= state_gl_d;
+					--end if;
+
+
+-- right branch door data van thijs, bestaande uit state_gr_d, state_sr_d, state_r_read.      We need to make sure the robot turns early enough so lmr = 100 when we encounter the line again.
+		when state_gr_d  => 
+ 					count_reset <= '0';
 					motor_l_reset <= '0';
 					motor_r_reset <= '1';
 
@@ -305,65 +351,109 @@ begin
 					write_data <= '1';
 					read_data <= '0';
 				
-				-- This has to be changed so the robot goes to the sharp turn
-				-- when sensors are detecting the line again
-				if (unsigned(count_in) < to_unsigned(1000000, 20)) then
-					new_state <= state_gr_d;
+				--if (unsigned(count_in) < to_unsigned(1000000, 20)) then
+					--new_state <= state_gr_d;
 					
-				elsif (unsigned(count_in) >= to_unsigned(1000000, 20)) then
-					new_state <= state_sr_d;
+				--elsif (unsigned(count_in) >= to_unsigned(1000000, 20)) then
+					--new_state <= state_sr_d;
 
+				--end if;
+				
+				if (sensor_l = '0' and sensor_m = '0' and sensor_r = '0') then
+					new_state <= state_gr_d_2;
+				else 
+					new_state <= state_gr_d;
 				end if;
 
+		
 
-		when state_sr_d  => 	count_reset <= '0';
+		when state_gr_d_2  => 
+					count_reset <= '0';
 					motor_l_reset <= '0';
-					motor_r_reset <= '0';
+					motor_r_reset <= '1';
 
 					motor_l_direction <= '1';
-					motor_r_direction <= '1';		
+					motor_r_direction <= '0';
+			
+					data_out(7) <= '0';
+					data_out(6) <= '1';
+					data_out(5) <= '1';
+					data_out(4) <= sensor_l;
+					data_out(3) <= sensor_m;
+					data_out(2) <= sensor_r;
+					data_out(1) <= mine_s;
+					data_out(0) <= '1';
 
-					data_out <= "00000000";
-
-					write_data <= '0';
+					write_data <= '1';
 					read_data <= '0';
+				
+				--if (unsigned(count_in) < to_unsigned(1000000, 20)) then
+					--new_state <= state_gr_d;
 					
-				if (data_ready = '0') then
-					new_state <= state_sr_d;
-					
-				else
-					new_state <= state_r_read;
+				--elsif (unsigned(count_in) >= to_unsigned(1000000, 20)) then
+					--new_state <= state_sr_d;
+
+				--end if;
+				
+				if (sensor_l = '1' and sensor_m = '0' and sensor_r = '0') then
+					new_state <= state_f_write;
+				else 
+					new_state <= state_gr_d_2;
 				end if;
 
 
-		when state_r_read => 	count_reset		<= '1';		 
-					motor_l_reset		<= '1';		
-					motor_r_reset		<= '1';	
+		--when state_sr_d  => 	count_reset <= '0';				-- Don't need sharp right and r_read anymore, since we go to forward state after a turn.
+					--motor_l_reset <= '0';
+					--motor_r_reset <= '0';
 
-					motor_l_direction	<= '0';
-					motor_r_direction	<= '0';
+					--motor_l_direction <= '1';
+					--motor_r_direction <= '1';		
 
-					data_out		<= "00000000";
-					write_data <= '0';
-					read_data <= '1';
+					--data_out <= "00000000";
+
+					--write_data <= '0';
+					--read_data <= '0';
 					
-					if (data_in = "00000001") then			
-						new_state <= state_gl_d;
+				--if (unsigned(count_in) < to_unsigned(1000000, 20)) then
+					--new_state <= state_sr_d;
+					
+				--elsif (unsigned(count_in) >= to_unsigned(1000000, 20)) then
+					--new_state <= state_r_read;
+				--end if;
 
-					elsif (data_in = "00000010") then
-						new_state <= state_gr_d;
 
-					elsif (data_in = "00000011") then
-						new_state <= state_f_write;
+		--when state_r_read => 	count_reset		<= '1';		 
+					--motor_l_reset		<= '1';		
+					--motor_r_reset		<= '1';	
 
-					elsif (data_in = "00000100") then
-						new_state <= state_s_write;
-					else
-						new_state <= state_gr_d;
-					end if;
+					--motor_l_direction	<= '0';
+					--motor_r_direction	<= '0';
+
+					--data_out		<= "00000000";
+					--write_data <= '0';
+					--read_data <= '1';
+					
+					--if (data_ready = '0') then
+						--new_state <= state_gr_d;
+
+					--elsif (data_in = "00000001") then			
+						--new_state <= state_gl_d;
+
+					--elsif (data_in = "00000010") then
+						--new_state <= state_gr_d;
+
+					--elsif (data_in = "00000011") then
+						--new_state <= state_f_write;
+
+					--elsif (data_in = "00000100") then
+						--new_state <= state_s_write;
+					--else
+						--new_state <= state_gr_d;
+					--end if;
 
 -- forward branch met state_f_write, state_f_read en de line follower.
-		when state_f_write  => 	count_reset <= '0';
+		when state_f_write  => 
+					count_reset <= '0';
 					motor_l_reset <= '0';
 					motor_r_reset <= '0';
 
@@ -383,6 +473,10 @@ begin
 					data_out(0) <= '1';
 										
 			--define new_state or correct when offset from path
+				if (unsigned(count_in) < to_unsigned(1000000, 20)) then
+					new_state <= state_f_write;
+				
+				elsif (unsigned(count_in) >= to_unsigned(1000000, 20)) then
 					if (data_ready = '1') then
 						new_state	<= state_f_read;
 
@@ -402,11 +496,13 @@ begin
 						new_state <= state_f_write;
 
 					end if;
+				end if;
+		
 		
 
-		when state_f_read =>	count_reset <= '0';
-					motor_l_reset <= '0';
-					motor_r_reset <= '0';
+		when state_f_read =>	count_reset <= '1';
+					motor_l_reset <= '1';
+					motor_r_reset <= '1';
 
 					motor_l_direction <= '1';
 					motor_r_direction <= '0';
@@ -444,10 +540,6 @@ begin
 				
 					data_out <= "00000000";
 			
-					-- This also has to be changed to react on the signals
-					-- form the sensors
-					-- 
-					-- Same for the ones below 
 				if (unsigned(count_in) < to_unsigned(1000000, 20)) then
 					new_state <= state_gl;
 					
