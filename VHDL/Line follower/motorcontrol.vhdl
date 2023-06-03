@@ -27,7 +27,7 @@ begin
 	process (clk)
 	begin
 		if (rising_edge (clk)) then
-			if (reset = '1' OR a = '1') then
+			if (reset = '1' OR a = '1') then --look here !!!!
 				state <= state0;
 			else
 				state <= new_state;
