@@ -3,6 +3,9 @@
 --	resets when the reset signals comes in, so the controller stops it.
 --	It also sends a new reset signal to the motorcontrollers, every 20ms,
 --	so they don't have to be reset perioidically by the controller.
+
+--     DONE.
+
 -- 3.) 	Line follower needs to react to the sensors to go back to the previous
 --	state - forward. See comments below.
 -- 4.)	values of the reset signals below has to be changed, because now you only
