@@ -6,6 +6,7 @@ entity timebase is
 	port (  clk             : in std_logic;
         	reset           : in std_logic;
         	count_out       : out std_logic_vector (19 downto 0)
+		-- add a new reset out here
  	) ;
  end entity timebase ;
 
@@ -17,10 +18,13 @@ entity timebase is
  	process ( clk )
  	begin
  		if ( clk'event and clk ='1' ) then
-			if ( reset = '1' ) then
+			if ( reset = '1' OR count >= 20ms ) then
  				count <= ( others => '0');
+				-- new reset out is 1 here 
  			else
  				count <= new_count;
+				-- new reset out is 0 here
+
  			end if;
  		end if;
  	end process;
