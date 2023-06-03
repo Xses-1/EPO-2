@@ -9,6 +9,8 @@ entity motorcontrol is
 		reset		: in	std_logic;
 		direction	: in	std_logic;
 		count_in	: in	std_logic_vector (19 downto 0);  -- Please enter upper bound
+	       -- add new reset input here, I am going to call it "a" for implicity
+			-- this is mapped to the new reset from the timebase
 
 		pwm		: out	std_logic
 	);
@@ -25,7 +27,7 @@ begin
 	process (clk)
 	begin
 		if (rising_edge (clk)) then
-			if (reset = '1') then
+			if (reset = '1' OR a = '1') then
 				state <= state0;
 			else
 				state <= new_state;
