@@ -8,10 +8,14 @@
 
 -- 3.) 	Line follower needs to react to the sensors to go back to the previous
 --	state - forward. See comments below.
+
+--      DONE. Right and Left branch mechanisms changed. The line follower in forward state should also react on the sensor values? 
+
 -- 4.)	values of the reset signals below has to be changed, because now you only
 --	use them to stop the motors if needed and reset everything at the beggining,
 --	not for the periodical reset.For example, you stop motors in the stop state
 --	and in the gentle stop state.
+
 -- 5.)  Also check the values of the motor direction signals.
 
 --      DONE. (btw, the direction signals were given in the line follower.)
@@ -19,8 +23,14 @@
 -- 6.)	U turn is now also broken, so the gentle left/right and sharp left/right 
 --	has to be separated the same way as the rest of the states is, with the
 --	separate read, write states.
+
+--     DONE. U-turn branch implemented, two new extra states. 
+
 -- 7.)	C code hast to also be now adjusted for the U-turn and you also need new
 --	opcode naturally.
+
+
+
 
 
 
@@ -70,7 +80,11 @@ architecture behavioural of controller is
 					 state_s_write, state_s_read,										
 					 state_gl_d, state_gl_d_2, --state_sl_d, state_l_read,								
 					 state_gr_d, state_gr_d_2, --state_sr_d, state_r_read,								
-					 state_f_write, state_f_read, state_gl, state_sl, state_gr, state_sr);											
+					 state_f_write, state_f_read, state_gl, state_sl, state_gr, state_sr,
+					 state_u_turn, state_u_turn_2
+
+					
+);											
 
 	signal state, new_state: controller_state;
 
@@ -610,6 +624,63 @@ begin
 
 				end if;
 
+
+
+--u-turn branch implented as two sharp right states, we turn sharp right until we see lmr = 010 again, then go back to forward state.	
+--we can loop in a state, because the periodical reset, resets the counter and motors.
+		when state_u_turn =>	count_reset <= '0';		
+					motor_l_reset <= '0';
+					motor_r_reset <= '0';
+
+					motor_l_direction <= '1';
+					motor_r_direction <= '1';		
+
+					data_out(7) <= '0';
+					data_out(6) <= '1';
+					data_out(5) <= '1';
+					data_out(4) <= sensor_l;
+					data_out(3) <= sensor_m;
+					data_out(2) <= sensor_r;
+					data_out(1) <= mine_s;
+					data_out(0) <= '1';
+
+					write_data <= '1';
+					read_data <= '0';
+					
+				if (sensor_l = '0' and sensor_m = '0' and sensor_r = '0') then
+					new_state <= state_u_turn_2;
+				else 
+					new_state <= state_u_turn;
+				end if;
+
+		
+		when state_u_turn_2 =>	count_reset <= '0';		
+					motor_l_reset <= '0';
+					motor_r_reset <= '0';
+
+					motor_l_direction <= '1';
+					motor_r_direction <= '1';		
+
+					data_out(7) <= '0';
+					data_out(6) <= '1';
+					data_out(5) <= '1';
+					data_out(4) <= sensor_l;
+					data_out(3) <= sensor_m;
+					data_out(2) <= sensor_r;
+					data_out(1) <= mine_s;
+					data_out(0) <= '1';
+
+					write_data <= '1';
+					read_data <= '0';
+					
+				if (sensor_l = '0' and sensor_m = '1' and sensor_r = '0') then
+					new_state <= state_f_write;
+				else 
+					new_state <= state_u_turn_2;
+				end if;
+
 		end case;
 	end process;
 end architecture behavioural;	
+
+
