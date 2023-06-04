@@ -18,7 +18,7 @@ entity timebase is
  	process ( clk )
  	begin
  		if ( clk'event and clk ='1' ) then
-			if ( reset = '1' OR count >= 20ms ) then
+			if ( reset = '1' OR count >= to_unsigned(1000000, 20)) then
  				count <= ( others => '0');
 				-- new reset out is 1 here 
  			else
