@@ -497,25 +497,7 @@ begin
 					new_state <= state_f_write;
 				
 				elsif (unsigned(count_in) >= to_unsigned(1000000, 20)) then
-					if (data_ready = '1') then
-						new_state	<= state_f_read;
-
-					elsif (sensor_l = '0' and sensor_m = '0' and sensor_r = '1') then
-						new_state <= state_gl;
-
-					elsif (sensor_l = '0' and sensor_m = '1' and sensor_r = '1') then
-						new_state <= state_sl;
-
-					elsif (sensor_l = '1' and sensor_m = '0' and sensor_r = '0') then
-						new_state <= state_gr;
-
-					elsif (sensor_l = '1' and sensor_m = '1' and sensor_r = '0') then
-						new_state <= state_sr;
-
-					else 
-						new_state <= state_f_write;
-
-					end if;
+					new_state <= state_f_read;
 				end if;
 		
 		
@@ -533,23 +515,47 @@ begin
 					write_data <= '0';
 					read_data <= '1';
 
-					if (data_in = "00000001") then			
-						new_state <= state_gl_d;
 
-					elsif (data_in = "00000010") then
-						new_state <= state_gr_d;
+					if (data_ready = '1') then
+						if (data_in = "00000001") then			
+							new_state <= state_gl_d;
 
-					elsif (data_in = "00000011") then
-						new_state <= state_f_write;
+						elsif (data_in = "00000010") then
+							new_state <= state_gr_d;
 
-					elsif (data_in = "00000100") then
-						new_state <= state_s_write;
-					
-					elsif (data_in = "00000101") then           -- new opcode for u turn = "00000101" 
-						new_state <= state_u_turn;
-					
+						elsif (data_in = "00000011") then
+							new_state <= state_f_write;
+
+						elsif (data_in = "00000100") then
+							new_state <= state_s_write;
+						
+						elsif (data_in = "00000101") then           -- new opcode for u turn = "00000101" 
+							new_state <= state_u_turn;
+
+						end if;
+
+					elsif (data_ready = '0') then
+						if (sensor_l = '0' and sensor_m = '0' and sensor_r = '1') then
+							new_state <= state_gl;
+
+						elsif (sensor_l = '0' and sensor_m = '1' and sensor_r = '1') then
+							new_state <= state_sl;
+
+						elsif (sensor_l = '1' and sensor_m = '0' and sensor_r = '0') then
+							new_state <= state_gr;
+
+						elsif (sensor_l = '1' and sensor_m = '1' and sensor_r = '0') then
+							new_state <= state_sr;
+
+						else 
+							if (unsigned(count_in) >= to_unsigned(1000000, 20)) then -- I've already added this
+														 -- so write is low for more 
+								new_state <= state_f_write;			 -- than 1 clock cycle
+							end if;
+
+						end if;
 					else
-						new_state <= state_f_write;
+						new_state <= state_f_read;
 					end if;
 										
 
