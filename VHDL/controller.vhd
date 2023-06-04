@@ -4,6 +4,7 @@
 -- 1.) UART communication seems to not work
 -- 
 -- 2.) There is a bug in timebase. 
+-- Debugged
 --
 -- 3.) 	Transition sl -> gl in the old code should also depend on the signals
 --	from the sensors, because you don't have to read, or write the data if you just do a turn.
