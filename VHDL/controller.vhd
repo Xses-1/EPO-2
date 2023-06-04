@@ -21,7 +21,8 @@
 --	and in the gentle stop state.
 --
 --      Already done? Reset signals for the motors can't be changed???? Because then you change the pwm outputs of the motorcontrols...
---	Wiktor: NO, you need to change COUNTER RESET for sure.
+--	Wiktor: NO, you need to change COUNTER RESET for sure.   
+--	Wilson: Changed.
 --
 -- 6.)	U turn is now also broken, so the gentle left/right and sharp left/right 
 --	has to be separated the same way as the rest of the states is, with the
@@ -131,24 +132,15 @@ begin
 
 					write_data <= '1';
 					read_data <= '0';
-					
-					data_out(7)	<= '1';
-					data_out(6)	<=	'1';
-					data_out(5)	<=	'1';
-					data_out(4)	<=	'1';
-					data_out(3) <=	'1';
-					data_out(2)	<=	'1';
-					data_out(1)	<=	'1';
-					data_out(0)	<=	'1';
 
-					--data_out(7)		<= '0';
-					--data_out(6)		<= '0';
-					--data_out(5)		<= '0';
-					--data_out(4)		<= sensor_l;
-					--data_out(3)		<= sensor_m;
-					--data_out(2)		<= sensor_r;
-					--data_out(1)		<= mine_s;
-					--data_out(0)		<= '1';
+					data_out(7)		<= '0';
+					data_out(6)		<= '0';
+					data_out(5)		<= '0';
+					data_out(4)		<= sensor_l;
+					data_out(3)		<= sensor_m;
+					data_out(2)		<= sensor_r;
+					data_out(1)		<= mine_s;
+					data_out(0)		<= '1';
 					
 				if (data_ready = '1') then
 					new_state <= state_reset_read;
@@ -181,6 +173,9 @@ begin
 
 					elsif (data_in = "00000100") then
 						new_state <= state_s_write;
+
+					-- No need for extra statement to go to u turn here,
+					-- since you never abruptly go to u-turn from reset.
 					else
 						new_state <= state_r;
 					end if;
@@ -231,10 +226,8 @@ begin
 					write_data <= '0';
 					read_data <= '1';
 
-					if (data_ready = '0') then
-						new_state <= state_s_write;
-
-					elsif (data_in = "00000001") then			
+			
+					if (data_in = "00000001") then			
 						new_state <= state_gl_d;
 
 					elsif (data_in = "00000010") then
@@ -256,6 +249,7 @@ begin
 		when state_gl_d =>	count_reset		<= '0';
 					motor_l_reset		<= '1';
 					motor_r_reset		<= '0';
+
 					motor_l_direction	<= '0';
 					motor_r_direction	<= '0'; 
 
@@ -270,14 +264,6 @@ begin
 
 					write_data		<= '1';
 					read_data		<= '0'; 
-
-					-- Why did you left this here? Not deleting it just makes code harder to read.
-					--if (unsigned(count_in) < to_unsigned(1000000, 20)) then
-						--new_state <= state_gl_d;
-							
-					--elsif (unsigned(count_in) >= to_unsigned(1000000, 20)) then
-						--new_state <= state_sl_d;
-					--end if;
 
 					if (sensor_l = '1' and sensor_m = '1' and sensor_r = '1') then
 						new_state <= state_gl_d_2;
@@ -308,9 +294,9 @@ begin
 
 
 		--when state_sl_d =>	count_reset		<= '0';			-- Don't need sharp left and l_read anymore, since we go to forward state after a turn.
-					--motor_l_reset		<= '0';				Wiktor: This can work, but I don't advise it, but then just delete this piece of code.
-					--motor_r_reset		<= '0';					Commenting this out makes the code much harder to read.
-					--motor_l_direction	<= '0';
+					--motor_l_reset		<= '0';				--Wiktor: This can work, but I don't advise it, but then just delete this piece of code.
+					--motor_r_reset		<= '0';					--Commenting this out makes the code much harder to read.
+					--motor_l_direction	<= '0';				--Wilson: I would just keep it as reference. Can be deleted if you'd like to.
 					--motor_r_direction	<= '0';
 
 					--data_out		<= "00000000";
@@ -407,14 +393,6 @@ begin
 					write_data <= '0';
 					read_data <= '0';
 				
-				--if (unsigned(count_in) < to_unsigned(1000000, 20)) then		-- Just delete this.
-					--new_state <= state_gr_d;
-					
-				--elsif (unsigned(count_in) >= to_unsigned(1000000, 20)) then
-					--new_state <= state_sr_d;
-
-				--end if;
-				
 				if (sensor_l = '1' and sensor_m = '0' and sensor_r = '0') then
 					new_state <= state_f_write;
 				else 
@@ -503,10 +481,11 @@ begin
 		
 		
 
-					-- And you didn't change the reset signals values here, so it will break everything.		
-		when state_f_read =>	count_reset <= '1';
-					motor_l_reset <= '1';
-					motor_r_reset <= '1';
+					-- And you didn't change the reset signals values here, so it will break everything.
+					-- Changed reset signals, robot will continue going forward in this state.
+		when state_f_read =>	count_reset <= '0';
+					motor_l_reset <= '0';
+					motor_r_reset <= '0';
 
 					motor_l_direction <= '1';
 					motor_r_direction <= '0';
@@ -551,9 +530,11 @@ begin
 						else 
 							if (unsigned(count_in) >= to_unsigned(1000000, 20)) then -- I've already added this
 														 -- so write is low for more 
-								new_state <= state_f_write;			 -- than 1 clock cycle
+								new_state <= state_f_write;			 -- than 1 clock cycle. 
+														-- Wilson: This if statement has no else?
+							--else
+							-- new_state <= state_f_read;      --Maybe this should be added.								
 							end if;
-
 						end if;
 					else
 						new_state <= state_f_read;
