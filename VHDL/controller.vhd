@@ -1,4 +1,4 @@
--- I miss understud one thing with your code (apparently that 20ms had double duty), but still there are many bugs and inconsistencies,
+-- I miss understood one thing with your code (apparently that 20ms had double duty), but still there are many bugs and inconsistencies,
 -- so I rewrote all the comments.
 --
 -- 1.) UART communication seems to not work
