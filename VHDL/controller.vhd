@@ -1,4 +1,6 @@
 -- 1.) UART communication seems to not work
+
+
 -- 2.) Timebase has to resets itself if (count >= 20ms), but it also
 --	resets when the reset signals comes in, so the controller stops it.
 --	It also sends a new reset signal to the motorcontrollers, every 20ms,
@@ -9,12 +11,16 @@
 -- 3.) 	Line follower needs to react to the sensors to go back to the previous
 --	state - forward. See comments below.
 
---      DONE. Right and Left branch mechanisms changed. The line follower in forward state should also react on the sensor values? 
+--      DONE. Right and Left branch mechanisms changed. The line follower (state_gl, sl, gr, sr),
+--      in forward state should also react to the sensor values? 
 
 -- 4.)	values of the reset signals below has to be changed, because now you only
 --	use them to stop the motors if needed and reset everything at the beggining,
 --	not for the periodical reset.For example, you stop motors in the stop state
 --	and in the gentle stop state.
+
+--      Already done? Reset signals for the motors can't be changed???? Because then you change the pwm outputs of the motorcontrols...
+
 
 -- 5.)  Also check the values of the motor direction signals.
 
@@ -29,11 +35,10 @@
 -- 7.)	C code hast to also be now adjusted for the U-turn and you also need new
 --	opcode naturally.
 
+--     DONE. Robot will now react to data_in = "00000101" and perform U-turn (line 530). Thijs has to adjust C-code to this!!!!
 
-
-
-
-
+-- 8.) Extra comment from Wilson and Kevin:  in order to write data you would need to pull write_data signal down after each write state,
+--     so if communication still isn't working , maybe try line 669...
 
 library IEEE;
 use IEEE.std_logic_1164.all;
@@ -81,9 +86,7 @@ architecture behavioural of controller is
 					 state_gl_d, state_gl_d_2, --state_sl_d, state_l_read,								
 					 state_gr_d, state_gr_d_2, --state_sr_d, state_r_read,								
 					 state_f_write, state_f_read, state_gl, state_sl, state_gr, state_sr,
-					 state_u_turn, state_u_turn_2
-
-					
+					 state_u_turn, state_u_turn_2		
 );											
 
 	signal state, new_state: controller_state;
@@ -273,16 +276,9 @@ begin
 					motor_l_direction	<= '0';
 					motor_r_direction	<= '0'; 
 
-					data_out(7)		<= '1';
-					data_out(6)		<= '0';
-					data_out(5)		<= '1';
-					data_out(4)		<= sensor_l;
-					data_out(3)		<= sensor_m;
-					data_out(2)		<= sensor_r;
-					data_out(1)		<= mine_s;
-					data_out(0)		<= '1';
+					data_out <= "00000000";
 
-					write_data		<= '1';
+					write_data		<= '0';
 					read_data		<= '0'; 
 					
 					if (sensor_l = '0' and sensor_m = '0' and sensor_r = '1') then
@@ -389,16 +385,9 @@ begin
 					motor_l_direction <= '1';
 					motor_r_direction <= '0';
 			
-					data_out(7) <= '0';
-					data_out(6) <= '1';
-					data_out(5) <= '1';
-					data_out(4) <= sensor_l;
-					data_out(3) <= sensor_m;
-					data_out(2) <= sensor_r;
-					data_out(1) <= mine_s;
-					data_out(0) <= '1';
+					data_out <= "00000000";
 
-					write_data <= '1';
+					write_data <= '0';
 					read_data <= '0';
 				
 				--if (unsigned(count_in) < to_unsigned(1000000, 20)) then
@@ -537,6 +526,10 @@ begin
 
 					elsif (data_in = "00000100") then
 						new_state <= state_s_write;
+					
+					elsif (data_in = "00000101") then           -- new opcode for u turn = "00000101" 
+						new_state <= state_u_turn;
+					
 					else
 						new_state <= state_f_write;
 					end if;
@@ -661,16 +654,9 @@ begin
 					motor_l_direction <= '1';
 					motor_r_direction <= '1';		
 
-					data_out(7) <= '0';
-					data_out(6) <= '1';
-					data_out(5) <= '1';
-					data_out(4) <= sensor_l;
-					data_out(3) <= sensor_m;
-					data_out(2) <= sensor_r;
-					data_out(1) <= mine_s;
-					data_out(0) <= '1';
+					data_out <= "00000000";
 
-					write_data <= '1';
+					write_data <= '0';
 					read_data <= '0';
 					
 				if (sensor_l = '0' and sensor_m = '1' and sensor_r = '0') then
@@ -680,7 +666,10 @@ begin
 				end if;
 
 		end case;
+	
+		-- if no data written, maybe pull write_data down to 0 after each process? see implementation below.
+
+		-- write_data <= '0';
 	end process;
 end architecture behavioural;	
-
 
