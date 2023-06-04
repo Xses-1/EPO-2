@@ -1,30 +1,20 @@
+-- I miss understud one thing with your code (apparently that 20ms had double duty), but still there are many bugs and inconsistencies,
+-- so I rewrote all the comments.
+--
 -- 1.) UART communication seems to not work
+-- 
+-- 2.) There is a bug in timebase. 
 --
---
--- 2.) Timebase has to resets itself if (count >= 20ms), but it also
---	resets when the reset signals comes in, so the controller stops it.
---	It also sends a new reset signal to the motorcontrollers, every 20ms,
---	so they don't have to be reset perioidically by the controller.
---
---     DONE.
---
--- 3.) 	Line follower needs to react to the sensors to go back to the previous
---	state - forward. See comments below.
---
---      Right and Left branch mechanisms changed. The line follower (state_gl, sl, gr, sr),
---      in forward state should also react to the sensor values? 
---
---	By Line Follower I meant original line follower (the one attached to the forward state), and
---	you didn't fix this, however transition sl -> gl in the old code should also depend on the signals
---	from the sensors.
+-- 3.) 	Transition sl -> gl in the old code should also depend on the signals
+--	from the sensors, because you don't have to read, or write the data if you just do a turn.
 --	What you did, changed the structure of the entire state diagram drastically, if Thijs is 
---	ok with that then sure, otherwise you have to reverse gl, sl and l states to what tey were before
+--	ok with that then sure, otherwise you have to reverse to gl, sl and l states to what tey were before
 --	and make them, so they are not dependable on time but as I said: transition gl -> sl is dpendable
 --	on the value from the sensors and transition sl -> l depends on data_ready = '1'.
 --	I think what was before was much much better solution, and changin the structure like that right now
--- 	is very stupid, however you spoke with Thijs, so idk what you agreed on.
+-- 	is very stupid, however it might work as it is right now, so just leave it.
 --
--- 4.)	values of the reset signals below has to be changed, because now you only
+-- 4.)	Values of the reset signals below has to be changed, because now you only
 --	use them to stop the motors if needed and reset everything at the beggining,
 --	not for the periodical reset.For example, you stop motors in the stop state
 --	and in the gentle stop state.
@@ -32,19 +22,11 @@
 --      Already done? Reset signals for the motors can't be changed???? Because then you change the pwm outputs of the motorcontrols...
 --	Wiktor: NO, you need to change COUNTER RESET for sure.
 --
---
--- 5.)  Also check the values of the motor direction signals.
---
---      DONE. (btw, the direction signals were given in the line follower.)
---
 -- 6.)	U turn is now also broken, so the gentle left/right and sharp left/right 
 --	has to be separated the same way as the rest of the states is, with the
 --	separate read, write states.
 --
---     DONE. U-turn branch implemented, two new extra states.
---	Wiktor: Again, you did completely different thing than I told you. If you ahd separated gl and sl, so
---	you can go to either of them based on incoming data then you wouldn't need to change the state diagram
---	and Thijs wouldn't have to change his code. Now you implemented a U turn here and did what Arjan told
+--      Now you implemented a U turn here and did what Arjan told
 --	but in very broken way. You are going out of U-turn based on the sensor signals, but you are going into
 --	it based on the incoming data, wtf? You either do 2x sl turn and you go in and out of it based on the 
 --	UART data, or you go into U-turn based on the MINE_SENSOR STATE (YOU HAVE THIS INPUT HERE, SO WHY TF
@@ -64,6 +46,12 @@
 --
 --	Wiktor: I am not sure is this supposed to be done. It must be checked with timing diagram, so this is kinda respnsibility of UART grup.
 --	Your implementation in the line 669 never gonna work and I won't explain you why, you SHOULD KNOW IT if you passed the DSB exam.
+--
+--	Solution to that might be to use read states as refresh states, but then you have to add delays according to timing diagrams (not just 20ms
+--	which was needed for motors reset). I didn't know about that, so I was trying to optimize the code for reading the UART as fast as possible.
+--	Now all the trasitions to read state should be done after the minimum time needed by UART fetch to the data and then in the read state you
+--	have to check if data_ready = '1' and that must be consistent for all transitions. It's not conssitent in the forward state. You should move
+--	OG line follower to read state then and just go there every 20 ms.
 
 library IEEE;
 use IEEE.std_logic_1164.all;
@@ -221,7 +209,7 @@ begin
 						write_data		<= '1';
 						read_data		<= '0';
 
-					-- WTF is this?! This should depend on data_ready = '1'
+					
 	                             	if (unsigned(count_in) < to_unsigned(1000000, 20)) then
 						new_state <= state_s_write;
 							
@@ -505,7 +493,6 @@ begin
 										
 			--define new_state or correct when offset from path
 
-				--Why to fuck is this again dependable on the time?! This should only depend on data_ready = '1'
 				if (unsigned(count_in) < to_unsigned(1000000, 20)) then
 					new_state <= state_f_write;
 				
@@ -578,8 +565,6 @@ begin
 				
 					data_out <= "00000000";
 			
-				-- Again why is this dependable on time?! This should depend on signals from the sensors.
-				-- Same for all the other line follower states below.
 				if (unsigned(count_in) < to_unsigned(1000000, 20)) then
 					new_state <= state_gl;
 					
