@@ -1,44 +1,69 @@
 -- 1.) UART communication seems to not work
-
-
+--
+--
 -- 2.) Timebase has to resets itself if (count >= 20ms), but it also
 --	resets when the reset signals comes in, so the controller stops it.
 --	It also sends a new reset signal to the motorcontrollers, every 20ms,
 --	so they don't have to be reset perioidically by the controller.
-
+--
 --     DONE.
-
+--
 -- 3.) 	Line follower needs to react to the sensors to go back to the previous
 --	state - forward. See comments below.
-
---      DONE. Right and Left branch mechanisms changed. The line follower (state_gl, sl, gr, sr),
+--
+--      Right and Left branch mechanisms changed. The line follower (state_gl, sl, gr, sr),
 --      in forward state should also react to the sensor values? 
-
+--
+--	By Line Follower I meant original line follower (the one attached to the forward state), and
+--	you didn't fix this, however transition sl -> gl in the old code should also depend on the signals
+--	from the sensors.
+--	What you did, changed the structure of the entire state diagram drastically, if Thijs is 
+--	ok with that then sure, otherwise you have to reverse gl, sl and l states to what tey were before
+--	and make them, so they are not dependable on time but as I said: transition gl -> sl is dpendable
+--	on the value from the sensors and transition sl -> l depends on data_ready = '1'.
+--	I think what was before was much much better solution, and changin the structure like that right now
+-- 	is very stupid, however you spoke with Thijs, so idk what you agreed on.
+--
 -- 4.)	values of the reset signals below has to be changed, because now you only
 --	use them to stop the motors if needed and reset everything at the beggining,
 --	not for the periodical reset.For example, you stop motors in the stop state
 --	and in the gentle stop state.
-
+--
 --      Already done? Reset signals for the motors can't be changed???? Because then you change the pwm outputs of the motorcontrols...
-
-
+--	Wiktor: NO, you need to change COUNTER RESET for sure.
+--
+--
 -- 5.)  Also check the values of the motor direction signals.
-
+--
 --      DONE. (btw, the direction signals were given in the line follower.)
-
+--
 -- 6.)	U turn is now also broken, so the gentle left/right and sharp left/right 
 --	has to be separated the same way as the rest of the states is, with the
 --	separate read, write states.
-
---     DONE. U-turn branch implemented, two new extra states. 
-
+--
+--     DONE. U-turn branch implemented, two new extra states.
+--	Wiktor: Again, you did completely different thing than I told you. If you ahd separated gl and sl, so
+--	you can go to either of them based on incoming data then you wouldn't need to change the state diagram
+--	and Thijs wouldn't have to change his code. Now you implemented a U turn here and did what Arjan told
+--	but in very broken way. You are going out of U-turn based on the sensor signals, but you are going into
+--	it based on the incoming data, wtf? You either do 2x sl turn and you go in and out of it based on the 
+--	UART data, or you go into U-turn based on the MINE_SENSOR STATE (YOU HAVE THIS INPUT HERE, SO WHY TF
+--	YOU ARE NOT USING IT IF YOU DID IMPLEMENT THE WHOLE U TURN) and go out based on sensor, like you did.
+--	You just send state of the mine sensor to Thijs, so he can just send it back to you, this does nothing
+--	else than intrduce delays. You either target simplicity in your design, or full autonomy.
+--
 -- 7.)	C code hast to also be now adjusted for the U-turn and you also need new
 --	opcode naturally.
-
+--
 --     DONE. Robot will now react to data_in = "00000101" and perform U-turn (line 530). Thijs has to adjust C-code to this!!!!
-
+--											 No he doesn't, comment above. You are
+--											Just pushing work to Thijs unnecesairly.
+--
 -- 8.) Extra comment from Wilson and Kevin:  in order to write data you would need to pull write_data signal down after each write state,
 --     so if communication still isn't working , maybe try line 669...
+--
+--	Wiktor: I am not sure is this supposed to be done. It must be checked with timing diagram, so this is kinda respnsibility of UART grup.
+--	Your implementation in the line 669 never gonna work and I won't explain you why, you SHOULD KNOW IT if you passed the DSB exam.
 
 library IEEE;
 use IEEE.std_logic_1164.all;
@@ -66,7 +91,7 @@ entity controller is
 		data_out		: out	std_logic_vector (7 downto 0);	
 		write_data		: out	std_logic;
 		read_data		: out	std_logic;
---		
+
 		count_reset		: out	std_logic;
 
 		motor_l_reset		: out	std_logic;
@@ -196,6 +221,7 @@ begin
 						write_data		<= '1';
 						read_data		<= '0';
 
+					-- WTF is this?! This should depend on data_ready = '1'
 	                             	if (unsigned(count_in) < to_unsigned(1000000, 20)) then
 						new_state <= state_s_write;
 							
@@ -256,13 +282,14 @@ begin
 					write_data		<= '1';
 					read_data		<= '0'; 
 
+					-- Why did you left this here? Not deleting it just makes code harder to read.
 					--if (unsigned(count_in) < to_unsigned(1000000, 20)) then
 						--new_state <= state_gl_d;
 							
 					--elsif (unsigned(count_in) >= to_unsigned(1000000, 20)) then
 						--new_state <= state_sl_d;
 					--end if;
-					
+
 					if (sensor_l = '0' and sensor_m = '0' and sensor_r = '0') then
 						new_state <= state_gl_d_2;
 					else 
@@ -281,6 +308,7 @@ begin
 					write_data		<= '0';
 					read_data		<= '0'; 
 					
+					-- I am not sure wheather this is correct, but should be fine.
 					if (sensor_l = '0' and sensor_m = '0' and sensor_r = '1') then
 						new_state <= state_f_write;
 					else 
@@ -291,8 +319,8 @@ begin
 
 
 		--when state_sl_d =>	count_reset		<= '0';			-- Don't need sharp left and l_read anymore, since we go to forward state after a turn.
-					--motor_l_reset		<= '0';
-					--motor_r_reset		<= '0';
+					--motor_l_reset		<= '0';				Wiktor: This can work, but I don't advise it, but then just delete this piece of code.
+					--motor_r_reset		<= '0';					Commenting this out makes the code much harder to read.
 					--motor_l_direction	<= '0';
 					--motor_r_direction	<= '0';
 
@@ -390,7 +418,7 @@ begin
 					write_data <= '0';
 					read_data <= '0';
 				
-				--if (unsigned(count_in) < to_unsigned(1000000, 20)) then
+				--if (unsigned(count_in) < to_unsigned(1000000, 20)) then		-- Just delete this.
 					--new_state <= state_gr_d;
 					
 				--elsif (unsigned(count_in) >= to_unsigned(1000000, 20)) then
@@ -476,6 +504,8 @@ begin
 					data_out(0) <= '1';
 										
 			--define new_state or correct when offset from path
+
+				--Why to fuck is this again dependable on the time?! This should only depend on data_ready = '1'
 				if (unsigned(count_in) < to_unsigned(1000000, 20)) then
 					new_state <= state_f_write;
 				
@@ -503,6 +533,7 @@ begin
 		
 		
 
+					-- And you didn't change the reset signals values here, so it will break everything.		
 		when state_f_read =>	count_reset <= '1';
 					motor_l_reset <= '1';
 					motor_r_reset <= '1';
@@ -547,6 +578,8 @@ begin
 				
 					data_out <= "00000000";
 			
+				-- Again why is this dependable on time?! This should depend on signals from the sensors.
+				-- Same for all the other line follower states below.
 				if (unsigned(count_in) < to_unsigned(1000000, 20)) then
 					new_state <= state_gl;
 					
@@ -621,6 +654,8 @@ begin
 
 --u-turn branch implented as two sharp right states, we turn sharp right until we see lmr = 010 again, then go back to forward state.	
 --we can loop in a state, because the periodical reset, resets the counter and motors.
+
+		-- I thought that Thijs tells you HOW (ie 2x sl turn) to U turn, but whatever. 
 		when state_u_turn =>	count_reset <= '0';		
 					motor_l_reset <= '0';
 					motor_r_reset <= '0';
@@ -656,6 +691,7 @@ begin
 
 					data_out <= "00000000";
 
+					--So, you don't write the data to Thijs here?
 					write_data <= '0';
 					read_data <= '0';
 					
@@ -670,6 +706,7 @@ begin
 		-- if no data written, maybe pull write_data down to 0 after each process? see implementation below.
 
 		-- write_data <= '0';
+		-- This is retarded.
 	end process;
 end architecture behavioural;	
 
