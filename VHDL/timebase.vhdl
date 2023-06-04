@@ -24,7 +24,7 @@ entity timebase is
  				count <= ( others => '0');
 				reset_out <= '1';				-- Added reset_out signal.
  			else
-				-- I am not going to explain the bug here.
+				reset_out <= '0'; 
  				count <= new_count;
  			end if;
  		end if;
