@@ -576,7 +576,7 @@ begin
 					new_state <= state_gl;
 					
 				elsif (unsigned(count_in) >= to_unsigned(1000000, 20)) then
-					new_state <= state_f_write;
+					new_state <= state_f_read;
 
 				end if;
 				
@@ -596,7 +596,7 @@ begin
 					new_state <= state_sl;
 					
 				elsif (unsigned(count_in) >= to_unsigned(1000000, 20)) then
-					new_state <= state_f_write;
+					new_state <= state_f_read;
 
 				end if;
 
@@ -617,7 +617,7 @@ begin
 					new_state <= state_gr;
 					
 				elsif (unsigned(count_in) >= to_unsigned(1000000, 20)) then
-					new_state <= state_f_write;
+					new_state <= state_f_read;
 
 				end if;
 
@@ -638,7 +638,7 @@ begin
 					new_state <= state_sr;
 					
 				elsif (unsigned(count_in) >= to_unsigned(1000000, 20)) then
-					new_state <= state_f_write;
+					new_state <= state_f_read;
 
 				end if;
 
