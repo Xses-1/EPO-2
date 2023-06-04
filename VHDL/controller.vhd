@@ -4,6 +4,7 @@
 -- 1.) UART communication seems to not work
 -- 
 -- 2.) There is a bug in timebase. 
+-- Debugged
 --
 -- 3.) 	Transition sl -> gl in the old code should also depend on the signals
 --	from the sensors, because you don't have to read, or write the data if you just do a turn.
@@ -278,7 +279,7 @@ begin
 						--new_state <= state_sl_d;
 					--end if;
 
-					if (sensor_l = '0' and sensor_m = '0' and sensor_r = '0') then
+					if (sensor_l = '1' and sensor_m = '1' and sensor_r = '1') then
 						new_state <= state_gl_d_2;
 					else 
 						new_state <= state_gl_d;
@@ -297,7 +298,7 @@ begin
 					read_data		<= '0'; 
 					
 					-- I am not sure wheather this is correct, but should be fine.
-					if (sensor_l = '0' and sensor_m = '0' and sensor_r = '1') then
+					if (sensor_l = '1' and sensor_m = '1' and sensor_r = '0') then
 						new_state <= state_f_write;
 					else 
 						new_state <= state_gl_d_2;
@@ -385,7 +386,7 @@ begin
 
 				--end if;
 				
-				if (sensor_l = '0' and sensor_m = '0' and sensor_r = '0') then
+				if (sensor_l = '1' and sensor_m = '1' and sensor_r = '1') then
 					new_state <= state_gr_d_2;
 				else 
 					new_state <= state_gr_d;
@@ -666,7 +667,7 @@ begin
 					write_data <= '1';
 					read_data <= '0';
 					
-				if (sensor_l = '0' and sensor_m = '0' and sensor_r = '0') then
+				if (sensor_l = '1' and sensor_m = '1' and sensor_r = '1') then
 					new_state <= state_u_turn_2;
 				else 
 					new_state <= state_u_turn;
@@ -686,7 +687,7 @@ begin
 					write_data <= '0';
 					read_data <= '0';
 					
-				if (sensor_l = '0' and sensor_m = '1' and sensor_r = '0') then
+				if (sensor_l = '1' and sensor_m = '0' and sensor_r = '1') then
 					new_state <= state_f_write;
 				else 
 					new_state <= state_u_turn_2;
