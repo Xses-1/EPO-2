@@ -134,7 +134,7 @@ component mine_sensor_top is
 	);
 end component mine_sensor_top;
 
-signal sensor_l, sensor_m, sensor_r, count_rs, reset_periodical, motor_l_rs, motor_l_d, motor_r_rs, motor_r_d: std_logic;
+signal sensor_l, sensor_m, sensor_r, count_rs, reset_periodical, motor_l_reset, motor_l_d, motor_r_reset, motor_r_d: std_logic;
 signal count: std_logic_vector(19 downto 0); 
 
 
@@ -225,10 +225,10 @@ LB2: controller port map(
 
 				count_reset		=>	count_rs,
 
-				motor_l_reset		=>	motor_l_rs,
+				motor_l_reset		=>	motor_l_reset,
 				motor_l_direction	=>	motor_l_d,
 
-				motor_r_reset		=>	motor_r_rs,
+				motor_r_reset		=>	motor_r_reset,
 				motor_r_direction	=>	motor_r_d
 				);
 
@@ -240,7 +240,7 @@ T1: timebase port map(		clk		=>	clk,
 );
 
 MCL: motorcontrol port map(	clk		=>	clk,
-				reset		=>	motor_l_rs,
+				reset		=>	motor_l_reset,
 				direction	=>	motor_l_d,
 				count_in	=>	count,
 				
@@ -251,7 +251,7 @@ MCL: motorcontrol port map(	clk		=>	clk,
 
 
 MCR: motorcontrol port map(	clk		=>	clk,
-				reset		=>	motor_r_rs,
+				reset		=>	motor_r_reset,
 				direction	=>	motor_r_d,
 				count_in	=>	count,
 
