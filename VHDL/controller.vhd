@@ -238,6 +238,12 @@ begin
 
 					elsif (data_in = "00000100") then
 						new_state <= state_s_write;
+
+
+					elsif (mine_sensor = '1' OR data_in = 'iets van Thijs') then
+						new_state <= state_u_turn;
+
+
 					else
 						new_state <= state_s_write;
 					end if;
