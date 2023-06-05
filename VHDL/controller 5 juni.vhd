@@ -44,38 +44,76 @@ architecture behavioural of controller is
 					 state_gl_d, state_gl_d_2,							
 					 state_gr_d, state_gr_d_2, 							
 					 state_f_write, state_f_read, state_gl, state_sl, state_gr, state_sr,
-					 state_u_turn, state_u_turn_2, state_u_turn_final		
+					 state_u_turn, state_u_turn_2, state_u_turn_final	
 );											
+	
+	type patch_state is		(state_ptc, --state patch to crossing
+					 state_crossing, --state when on crossing
+					 state_ctp,  --state crossing to patch	
+					 state_patch --state when on patch
+);
+
 
 	signal state, new_state: controller_state;
-	signal crossing, new_crossing: std_logic := '0';
+	signal state_p, new_state_p: patch_state;
+	signal patch: std_logic;
+
 
 begin
 	process (clk)
 	begin
 		if (rising_edge (clk)) then
 			if (reset = '1') then
-				state <= state_r;
+				state	<= state_r;
+				state_p <= state_ptc;
 			else
-				state <= new_state;
-				crossing <= new_crossing;
+				state 	<= new_state;
+				state_p	<= new_state_p;
 			end if;
 		end if;
 	end process;
 	
 
-	process (sensor_l, sensor_m, sensor_r, crossing)
+	process (sensor_l, sensor_m, sensor_r, patch)
 	begin
-	-- zodat bij oneven bbb wordt gedetect als kruising
-		if (sensor_l = '0' and sensor_m = '0' and sensor_r = '0') then
-			if (crossing = '0') then
-				new_crossing <= '1';
-			elsif (crossing = '1') then
-				new_crossing <= '0';
-			else
-				new_crossing <= '0';
-			end if;
-		end if;
+		case state_p is
+			
+			when state_ptc => 	patch <= '0';
+					
+					if (sensor_l = '0' and sensor_m = '0' and sensor_r = '0') then
+						new_state_p 	<=	state_crossing;
+					else
+
+						new_state_p 	<=	state_ptc;
+					end if;		
+
+			when state_crossing => 	patch <= '0';
+					
+					if (sensor_l = '0' and sensor_m = '0' and sensor_r = '0') then
+						new_state_p 	<=	state_crossing;
+					else
+
+						new_state_p 	<=	state_ctp;
+					end if;		
+
+			when state_ctp => 	patch <= '0';
+					
+					if (sensor_l = '0' and sensor_m = '0' and sensor_r = '0') then
+						new_state_p 	<=	state_patch;
+					else
+
+						new_state_p 	<=	state_ctp;
+					end if;
+			
+			when state_patch => 	patch <= '1';
+					
+					if (sensor_l = '0' and sensor_m = '0' and sensor_r = '0') then
+						new_state_p 	<=	state_patch;
+					else
+
+						new_state_p 	<=	state_ptc;
+					end if;	
+		end case;
 	end process;
 
 	process (sensor_l, sensor_m, sensor_r, count_in, state, data_in, data_ready, mine_s)
@@ -257,7 +295,7 @@ begin
 					
 					if (mine_s = '1') then
 						data_out 		<= "00000100";
-					elsif (falling_edge(crossing)) then
+					elsif (patch = '1') then
 						data_out		<= "00000010";
 					elsif (sensor_l = '1' and sensor_m = '1' and sensor_r = '1') then
 						data_out		<= "00000011";
