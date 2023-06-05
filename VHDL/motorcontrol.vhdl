@@ -26,7 +26,7 @@ begin
 	process (clk)
 	begin
 		if (rising_edge (clk)) then
-			if ((reset = '1') or (reset_in = '1')) then	-- added   or (reset_in = '1') 
+			if (reset_in = '1') then	-- added   or (reset_in = '1') 
 				state <= state0;
 			else
 				state <= new_state;
@@ -40,8 +40,11 @@ begin
 		case state is
 
 			when state0 => pwm <= '0';
-				new_state<=state1;
-			
+				if (reset = '0') then	
+					new_state <= state1;
+				else
+					new_state <= state0;
+				end if;
 
 			when state1 => pwm <= '1';
 				if (direction ='0' and unsigned(count_in) >= to_unsigned(50000, 20)) then
