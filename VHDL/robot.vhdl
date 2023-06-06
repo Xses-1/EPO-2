@@ -1,11 +1,6 @@
 library IEEE;
 use IEEE.std_logic_1164.all;
 
--- ROBOT ENTITY MOET NOG GEWIJZIGD WORDEN.
--- MINE SENSOR COMPONENT MOET NOG WORDEN TOEGEVOEGD EN GEPORTMAPPED.
--- MINE SENSOR MOET NOG IN DE CONTROLLER WORDEN GEPORTMAPPED.
--- UART GROEPJE KIJKEN NAAR COMPONENT EN PORT MAP SVP.
-
 entity robot is
 	port ( 
 	
@@ -63,7 +58,7 @@ component controller is
 		count_in		: in	std_logic_vector (19 downto 0);  
 
 --new inputs
-		data_in			: in 	std_logic_vector (7 downto 0);		
+		data_in			: in 	std_logic_vector (7 downto 0);	
 		data_ready		: in	std_logic;
 		mine_s			: in	std_logic;
 
@@ -134,7 +129,7 @@ component mine_sensor_top is
 	);
 end component mine_sensor_top;
 
-signal sensor_l, sensor_m, sensor_r, count_rs, reset_periodical, motor_l_reset, motor_l_d, motor_r_reset, motor_r_d: std_logic;
+signal sensor_l, sensor_m, sensor_r, count_rs, reset_periodical, motor_l_rs, motor_l_d, motor_r_rs, motor_r_d: std_logic;
 signal count: std_logic_vector(19 downto 0); 
 
 
@@ -163,7 +158,6 @@ M1: mine_sensor_top port map (	clk		=>	clk,
 				mine_out 	=> 	mine_out_signal);
 
 
--- UART groepje editen en checken graag.
 U1:	uart port map(
 					clk  => 		clk,
 					reset => 		reset,
@@ -174,16 +168,6 @@ U1:	uart port map(
 					data_in => 		data_uico,     
 					buffer_empty => 	buffer_empty,
 					write => 		write_sig,     
-
-
-					--data_out(7)	=>	led_7,
-					--data_out(6)	=>	led_6,
-					--data_out(5)	=>	led_5,
-					--data_out(4)	=>	led_4,
-					--data_out(3)	=>	led_3,
-					--data_out(2)	=>	led_2,
-					--data_out(1)	=>	led_1,
-					--data_out(0)	=>	led_0,
 					
 					data_out => 		data_uoci,
 					data_ready => 		data_ready_sig,  
@@ -203,32 +187,44 @@ LB2: controller port map(
 
 --new inputs
 
-				data_in			=> 	data_uoci,
+				--data_in(7)	=>	led_7,
+				--data_in(6)	=>	led_6,
+				--data_in(5)	=>	led_5,
+				--data_in(4)	=>	led_4,
+				--data_in(3)	=>	led_3,
+				--data_in(2)	=>	led_2,
+				--data_in(1)	=>	led_1,
+				--data_in(0)	=>	led_0,
+				
+				data_in		=> data_uoci,
+			
 				data_ready		=> 	data_ready_sig, 
+				
 				mine_s			=> 	mine_out_signal,
 
 
 --new outputs
 
-				data_out(7)	=>	led_7,
-				data_out(6)	=>	led_6,
-				data_out(5)	=>	led_5,
-				data_out(4)	=>	led_4,
-				data_out(3)	=>	led_3,
-				data_out(2)	=>	led_2,
-				data_out(1)	=>	led_1,
-				data_out(0)	=>	led_0,
-				--data_out		=> 	data_uico,
+				--data_out(7)	=>	led_7,
+				--data_out(6)	=>	led_6,
+				--data_out(5)	=>	led_5,
+				--data_out(4)	=>	led_4,
+				--data_out(3)	=>	led_3,
+				--data_out(2)	=>	led_2,
+				--data_out(1)	=>	led_1,
+				--data_out(0)	=>	led_0,
+				
+				data_out		=> 	data_uico,
 				write_data		=> 	write_sig,
 				read_data		=> 	read_sig,
 --
 
 				count_reset		=>	count_rs,
 
-				motor_l_reset		=>	motor_l_reset,
+				motor_l_reset		=>	motor_l_rs,
 				motor_l_direction	=>	motor_l_d,
 
-				motor_r_reset		=>	motor_r_reset,
+				motor_r_reset		=>	motor_r_rs,
 				motor_r_direction	=>	motor_r_d
 				);
 
@@ -240,24 +236,26 @@ T1: timebase port map(		clk		=>	clk,
 );
 
 MCL: motorcontrol port map(	clk		=>	clk,
-				reset		=>	motor_l_reset,
+				reset		=>	motor_l_rs,
 				direction	=>	motor_l_d,
 				count_in	=>	count,
 				
 				reset_in	=>	reset_periodical,			-- added reset periodical (new ports)
 
-				pwm		=>	motor_l_pwm);
+				pwm		=>	motor_l_pwm
+			);
 
 
 
 MCR: motorcontrol port map(	clk		=>	clk,
-				reset		=>	motor_r_reset,
+				reset		=>	motor_r_rs,
 				direction	=>	motor_r_d,
 				count_in	=>	count,
 
 				reset_in	=>	reset_periodical,			-- added reset periodical (new ports)
 				
-				pwm		=>	motor_r_pwm);
+				pwm		=>	motor_r_pwm
+		);
 
 
 end architecture structural;
