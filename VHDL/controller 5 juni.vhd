@@ -47,7 +47,7 @@ architecture behavioural of controller is
 					 state_u_turn, state_u_turn_2, state_u_turn_final	
 );											
 	
-	type patch_state is		(state_ptc, --state patch to crossing
+	type crossing_state is		(state_ptc, --state patch to crossing
 					 state_crossing, --state when on crossing
 					 state_ctp,  --state crossing to patch	
 					 state_patch --state when on patch
@@ -55,8 +55,8 @@ architecture behavioural of controller is
 
 
 	signal state, new_state: controller_state;
-	signal state_p, new_state_p: patch_state;
-	signal patch: std_logic;
+	signal state_p, new_state_p: crossing_state;
+	signal crossing: std_logic;
 
 
 begin
@@ -74,11 +74,11 @@ begin
 	end process;
 	
 
-	process (sensor_l, sensor_m, sensor_r, patch)
+	process (sensor_l, sensor_m, sensor_r, crossing)
 	begin
 		case state_p is
 			
-			when state_ptc => 	patch <= '0';
+			when state_ptc => 	crossing <= '0';
 					
 					if (sensor_l = '0' and sensor_m = '0' and sensor_r = '0') then
 						new_state_p 	<=	state_crossing;
@@ -87,7 +87,7 @@ begin
 						new_state_p 	<=	state_ptc;
 					end if;		
 
-			when state_crossing => 	patch <= '0';
+			when state_crossing => 	crossing <= '1';
 					
 					if (sensor_l = '0' and sensor_m = '0' and sensor_r = '0') then
 						new_state_p 	<=	state_crossing;
@@ -96,7 +96,7 @@ begin
 						new_state_p 	<=	state_ctp;
 					end if;		
 
-			when state_ctp => 	patch <= '0';
+			when state_ctp => 	crossing <= '0';
 					
 					if (sensor_l = '0' and sensor_m = '0' and sensor_r = '0') then
 						new_state_p 	<=	state_patch;
@@ -105,7 +105,7 @@ begin
 						new_state_p 	<=	state_ctp;
 					end if;
 			
-			when state_patch => 	patch <= '1';
+			when state_patch => 	crossing <= '0';
 					
 					if (sensor_l = '0' and sensor_m = '0' and sensor_r = '0') then
 						new_state_p 	<=	state_patch;
@@ -127,10 +127,10 @@ begin
 					motor_l_direction <= '0';
 					motor_r_direction <= '0';
 
-					write_data <= '1';
+					write_data <= '0';
 					read_data <= '0';
 
-					data_out <= "00000001";
+					data_out <= "00000000";
 					
 				if (data_ready = '1') then
 					new_state <= state_reset_read;
@@ -166,6 +166,10 @@ begin
 
 					-- No need for extra statement to go to u turn here, and probably no need for stop but leave it!!
 					-- since you never abruptly go to u-turn from reset.
+					
+					elsif (data_in = "00000101") then
+						new_state <= state_u_turn;
+						
 					else
 						new_state <= state_r;
 					end if;
@@ -184,7 +188,6 @@ begin
 						motor_r_direction	<= '0';
 
 						data_out  		<= "00000000";
-
 						write_data		<= '0';
 						read_data		<= '0';
 
@@ -228,7 +231,7 @@ begin
 					read_data		<= '0'; 
 					
 					
-					if (sensor_l = '1' and sensor_m = '1' and sensor_r = '0') then
+					if (sensor_l = '0' and sensor_m = '1' and sensor_r = '1') then
 						new_state <= state_f_write;
 					else 
 						new_state <= state_gl_d_2;
@@ -272,7 +275,7 @@ begin
 					write_data <= '0';
 					read_data <= '0';
 				
-				if (sensor_l = '0' and sensor_m = '1' and sensor_r = '1') then
+				if (sensor_l = '1' and sensor_m = '1' and sensor_r = '0') then
 					new_state <= state_f_write;
 				else 
 					new_state <= state_gr_d_2;
@@ -295,7 +298,7 @@ begin
 					
 					if (mine_s = '1') then
 						data_out 		<= "00000100";
-					elsif (patch = '1') then
+					elsif (crossing = '1') then
 						data_out		<= "00000010";
 					elsif (sensor_l = '1' and sensor_m = '1' and sensor_r = '1') then
 						data_out		<= "00000011";
@@ -487,7 +490,7 @@ begin
 					write_data <= '0';
 					read_data <= '0';
 					
-				if (sensor_l = '1' and sensor_m = '0' and sensor_r = '1') then
+				if ((sensor_l = '1' and sensor_m = '0' and sensor_r = '1') or (sensor_l = '0' and sensor_m = '0' and sensor_r = '0') ) then
 					new_state <= state_u_turn_final;
 				else 
 					new_state <= state_u_turn_2;
