@@ -167,8 +167,8 @@ begin
 					-- No need for extra statement to go to u turn here, and probably no need for stop but leave it!!
 					-- since you never abruptly go to u-turn from reset.
 					
-					elsif (data_in = "00000101") then
-						new_state <= state_u_turn;
+					--elsif (data_in = "00000101") then
+					--	new_state <= state_u_turn;
 						
 					else
 						new_state <= state_r;
