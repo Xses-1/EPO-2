@@ -46,7 +46,7 @@ architecture behavioural of controller is
 					 state_f_write, state_f_read, state_gl, state_sl, state_gr, state_sr,
 					 state_u_turn, state_u_turn_2, state_u_turn_final,
 					 
-					 state_pause_com_mine, state_pause_com_crossing, state_pause_com_www
+					 state_com_mine, state_com_crossing, state_com_www
 
 				
 );											
@@ -61,6 +61,7 @@ architecture behavioural of controller is
 	signal state, new_state: controller_state;
 	signal state_p, new_state_p: crossing_state;
 	signal crossing: std_logic;
+	signal count_com, new_count_com : unsigned (28 downto 0);
 
 
 begin
@@ -76,6 +77,28 @@ begin
 			end if;
 		end if;
 	end process;
+	
+
+
+--Counter for sending 1 byte every time !
+ 	process ( clk )
+ 	begin
+ 		if ( clk'event and clk ='1' ) then
+			if ( (reset = '1') ) then
+ 				count_com <= ( others => '0');
+ 			else
+ 				count_com <= new_count_com;
+ 			end if;
+ 		end if;
+ 	end process;
+
+ 	process ( count_com )
+ 	begin
+
+		new_count_com <= count_com + 1;
+
+ 	end process;
+--Eind counter for sending 1 byte!
 	
 	
 --FSM voor cross counting
@@ -309,29 +332,10 @@ begin
 					motor_l_direction <= '1';
 					motor_r_direction <= '0';
 
-					write_data <= '1';
+					--write_data <= '1';
+					write_data <= '0';     -- implementation wilson met arjen besproken
 					read_data <= '0';
-					
-			--oude stuk
-				--	if (mine_s = '1') then
-					--	data_out 		<= "00000100";
-				--	elsif (crossing = '1') then
-					--	data_out		<= "00000010";
-				--	elsif (sensor_l = '1' and sensor_m = '1' and sensor_r = '1') then
-					--	data_out		<= "00000011";
-				--	else 
-					--	data_out		<= "00000000";
-				--	end if;
-								
-
-				--if (unsigned(count_in) < to_unsigned(1000000, 20)) then
-				--	new_state <= state_f_write;
-				
-				--elsif (unsigned(count_in) >= to_unsigned(1000000, 20)) then
-					--new_state <= state_f_read;
-				--end if;
-			--eind oude stuk
-		
+					data_out <= "00000000";
 		
 			--Nieuw stukje om 80 keer communicatie te solven	
 				if (unsigned(count_in) < to_unsigned(1000000, 20)) then
@@ -340,83 +344,65 @@ begin
 				
 				elsif (unsigned(count_in) >= to_unsigned(1000000, 20)) then
 					if (mine_s = '1') then
-						data_out 		<= "00000100";
-						new_state		<= state_pause_com_mine;
+						new_state		<= state_com_mine;
+						
 					elsif (crossing = '1') then
-						data_out		<= "00000010";
-						new_state		<= state_pause_com_crossing;
+						new_state		<= state_com_crossing;
+						
 					elsif (sensor_l = '1' and sensor_m = '1' and sensor_r = '1') then
-						data_out		<= "00000011";
-						new_state		<= state_pause_com_www;
+						new_state		<= state_com_www;
+						
 					else 
-						data_out		<= "00000000";
 						new_state	<= state_f_read;
 					end if;
 				end if;
 		
-		when state_pause_com_mine =>	count_reset <= '1';							
-												motor_l_reset <= '1';
-												motor_r_reset <= '1';
+		when state_com_mine =>		
+						count_reset <= '1';							
+						motor_l_reset <= '1';
+						motor_r_reset <= '1';
 
-												motor_l_direction <= '0';
-												motor_r_direction <= '0';
+						motor_l_direction <= '0';
+						motor_r_direction <= '0';
+						write_data <= '0';
+						read_data <= '0';
 
-												write_data <= '0';
-												read_data <= '0';
-
-												data_out <= "00000000";
-						
-											new_state <= state_u_turn;
+						data_out <= "00000100";
+					
+						new_state <= state_u_turn;
+			
 											
 					
-		when state_pause_com_crossing => count_reset <= '0';
-													motor_l_reset <= '0';
-													motor_r_reset <= '0';
+		when state_com_crossing => 	count_reset <= '0';
+							motor_l_reset <= '0';
+							motor_r_reset <= '0';
 
-													motor_l_direction <= '1';
-													motor_r_direction <= '0';
+							motor_l_direction <= '1';
+							motor_r_direction <= '0';
 
-													write_data <= '0';
-													read_data <= '1';
+							write_data <= '1';
+							read_data <= '0';
 
-													data_out <= "00000000";
-												
-												if (data_ready = '1') then
-													if (data_in = "00000001") then			
-														new_state <= state_gl_d;
+							data_out	<= "00000010";
+					
+							new_state <= 	state_f_read;
 
-													elsif (data_in = "00000010") then
-														new_state <= state_gr_d;
+				
+											
+		when state_com_www	=> 	count_reset <= '1';							
+							motor_l_reset <= '1';
+							motor_r_reset <= '1';
 
-													elsif (data_in = "00000011") then
-														new_state <= state_f_read;
-													end if;
-												else
-													new_state <= state_f_read;
-												end if;
-													
-	
-		when state_pause_com_www	=> 	count_reset <= '1';							
-													motor_l_reset <= '1';
-													motor_r_reset <= '1';
+							motor_l_direction <= '0';
+							motor_r_direction <= '0';
 
-													motor_l_direction <= '0';
-													motor_r_direction <= '0';
+							write_data <= '1';
+							read_data <= '0';
 
-													write_data <= '0';
-													read_data <= '1';
+							data_out		<= "00000011";
 
-													data_out <= "00000000";
-												
-												if (data_ready = '1') then	
-													if (data_in = "00000100") then
-														new_state <= state_s_write;
-													elsif (data_in = "00000101") then           
-														new_state <= state_u_turn;
-													end if;
-												else
-													new_state <= state_f_read;
-												end if;
+							new_state <= state_f_read;
+						
 																									
 		-- eind nieuw stukje
 
@@ -468,14 +454,14 @@ begin
 								new_state <= state_sr;
 
 							else 														 
-								new_state <= state_f_write;			
+								new_state <= state_f_write;	
 														
 							end if;
 						end if;
 				else
 				new_state <= state_f_read;
 			end if;
-										
+								
 
 		when state_gl =>	count_reset <= '0';
 					motor_l_reset <= '1';
