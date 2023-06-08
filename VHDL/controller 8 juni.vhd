@@ -44,7 +44,7 @@ architecture behavioural of controller is
 					 state_gl_d, state_gl_d_2,							
 					 state_gr_d, state_gr_d_2, 							
 					 state_f, state_gl, state_sl, state_gr, state_sr,
-					 state_u_turn, state_u_turn_2, state_u_turn_final			
+					 state_u_turn, state_u_turn_2   --state_u_turn_final, weggehaald zie explanation helemaal onder.		
 );											
 	
 	type crossing_state is		(state_ptc, --state patch to crossing
@@ -110,7 +110,7 @@ begin
 
 
 --FSM voor cross counting
-	process (sensor_l, sensor_m, sensor_r, crossing, state_p)  --nieuwe element in sensitivity list (state_p)
+	process (sensor_l, sensor_m, sensor_r, state_p)  --deleted crossing signal from sensitivity list
 	begin
 		case state_p is
 			
@@ -173,23 +173,24 @@ begin
 						else
 							new_state_com <= state_com_r;
 						end if;
+
 											
 			when state_com_write =>		write_data <= '1';
-												read_data <= '0';
-												new_state_com <= state_com_wait;
+							read_data <= '0';
+							new_state_com <= state_com_wait;
 					
-												left_signal <= '0';
-												right_signal <= '0';
-													stop_signal <= '0';
-											u_turn_signal <= '0';
-											forward_signal<= '0';
+							left_signal <= '0';
+							right_signal <= '0';
+							stop_signal <= '0';
+							u_turn_signal <= '0';
+							forward_signal<= '0';
 
 						if (mine_s = '1') then
-							data_out <= "00000100";
+							data_out <= "00000100";  --Mine detected
 						elsif (crossing = '1') then
-							data_out <= "00000010";
+							data_out <= "00000010";  -- at crossing
 						elsif (sensor_l = '0' and sensor_m = '0' and sensor_r = '0') then
-							data_out <= "00000011";
+							data_out <= "00000011"; -- at dead end
 						end if;
 						
 													
@@ -304,10 +305,8 @@ begin
 					new_state <= state_gr;
 
 
-
 				elsif (sensor_l = '1' and sensor_m = '0' and sensor_r = '1') then
 					new_state <= state_f;
-
 
 
 				elsif (sensor_l = '1' and sensor_m = '1' and sensor_r = '0') then
@@ -391,7 +390,7 @@ begin
 						motor_l_direction	<= '0';
 						motor_r_direction	<= '0';
 
-	               new_state <= state_s;        -- end state, you never leave this, because ifyou come here you are finished with challenge.
+	               new_state <= state_s;        -- end state, you never leave this, because if you come here you are finished with challenge.
 							
 				
 
@@ -417,8 +416,8 @@ begin
 					motor_l_direction	<= '0';
 					motor_r_direction	<= '0'; 
 					
-				if (sensor_l = '0' and sensor_m = '1' and sensor_r = '1') then
-					new_state <= state_f;
+				if (sensor_l = '1' and sensor_m = '0' and sensor_r = '1') then   -- since we turn at cross section, 
+					new_state <= state_f;					-- we don't test for 011 anymore but rather 101
 				else 
 					new_state <= state_gl_d_2;
 				end if;
@@ -448,7 +447,7 @@ begin
 					motor_l_direction <= '1';
 					motor_r_direction <= '0';
 				
-				if (sensor_l = '1' and sensor_m = '1' and sensor_r = '0') then
+				if (sensor_l = '1' and sensor_m = '0' and sensor_r = '1') then  -- same comment as state_gl_d_2.
 					new_state <= state_f;
 				else 
 					new_state <= state_gr_d_2;
@@ -479,26 +478,29 @@ begin
 					motor_r_direction <= '1';		
 					
 				if ((sensor_l = '1' and sensor_m = '0' and sensor_r = '1') or (sensor_l = '0' and sensor_m = '0' and sensor_r = '0') ) then
-					new_state <= state_u_turn_final;
+					--new_state <= state_u_turn_final;
+					new_state <= state_f;
 				else 
 					new_state <= state_u_turn_2;
 				end if;
-		
-	when state_u_turn_final =>	count_reset <= '0';		
-					motor_l_reset <= '0';
-					motor_r_reset <= '0';
+	
+	--We don't really need u turn final state anymore, since this was implemented due to communication issues.	
 
-					motor_l_direction <= '1';
-					motor_r_direction <= '0';		
+	--when state_u_turn_final =>	count_reset <= '0';		
+					--motor_l_reset <= '0';
+					--motor_r_reset <= '0';
+
+					--motor_l_direction <= '1';
+					--motor_r_direction <= '0';		
 
 					
-				if (unsigned(count_in) < to_unsigned(1000000, 20)) then
-					new_state <= state_u_turn_final;
+				--if (unsigned(count_in) < to_unsigned(1000000, 20)) then
+					--new_state <= state_u_turn_final;
 					
-				elsif (unsigned(count_in) >= to_unsigned(1000000, 20)) then
-					new_state <= state_f;
+				---elsif (unsigned(count_in) >= to_unsigned(1000000, 20)) then
+					--new_state <= state_f;
 
-				end if;
+				--end if;
 
 		end case;
 	end process;
