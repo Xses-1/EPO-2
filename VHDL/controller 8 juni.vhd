@@ -153,8 +153,8 @@ begin
 
 
 --Process for communication
-	process (state_com, mine_s, crossing, sensor_l, sensor_m, sensor_r, data_ready, data_in) --I'm not sure about data_ready and in.
-	begin
+	process (state_com, mine_s, crossing, sensor_l, sensor_m, sensor_r, data_ready) --data_in) --I'm not sure about data_ready and in.
+	begin											--I dont think data_in should be here.	
 		case state_com is
 
 			when state_com_r =>	write_data <= '0';
@@ -245,7 +245,7 @@ begin
 
 
 --Process for motors
-	process (sensor_l, sensor_m, sensor_r, count_in, state, data_in, data_ready, mine_s,
+	process (sensor_l, sensor_m, sensor_r, count_in, state, mine_s, --data_in, data_ready,      --I don't think these two should be here (Not read anywhere in this process)
 		left_signal, right_signal, stop_signal, forward_signal, u_turn_signal) -- added the left, right, stop forward, uturn signals.
 	begin 
 		case state is
@@ -454,7 +454,7 @@ begin
 				end if;
 	
 
---u-turn branch implented as two sharp right states, we turn sharp right until we see lmr = 010 again, then go to u_turn_final to let Thijs know. 
+--u-turn branch implented as two sharp right states, we turn sharp right until we see lmr = 101 again. 
 
 		when state_u_turn =>	count_reset <= '0';		
 					motor_l_reset <= '0';
