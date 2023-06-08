@@ -1,0 +1,19 @@
+NET "clk" LOC = "B8";
+NET "reset" LOC = "A7"; # BTN3 used for reset
+NET "sensor_l_in" LOC = "B5" ;
+NET "sensor_m_in" LOC = "J3" ;
+NET "sensor_r_in" LOC = "A3" ;
+NET "motor_l_pwm" LOC = "A9" ; # servo left
+NET "motor_r_pwm" LOC = "B9" ; # servo right
+NET "rx" LOC = "A10" ; # xbee out ( received data )
+NET "tx" LOC = "C9" ; # xbee in ( data to send )
+NET "sensor_mine_in" LOC = "C6";
+NET "led_0" LOC = "M5";
+#NET "led_1" LOC = "M11";
+#NET "led_2" LOC = "P7";
+#NET "led_3" LOC = "P6";
+#NET "led_4" LOC = "N5";
+#NET "led_5" LOC = "N4";
+#NET "led_6" LOC = "P4";
+#NET "led_7" LOC = "G1"; 
+
