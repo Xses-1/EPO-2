@@ -215,6 +215,8 @@ begin
 							write_data <= '0';
 							read_data <= '1';
 							
+							data_out <= "00000000";
+							
 						if (data_in = "00000001") then
 							left_signal <= '1';     
 						elsif (data_in = "00000010") then
