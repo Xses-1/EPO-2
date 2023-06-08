@@ -39,12 +39,16 @@ end entity controller;
 
 architecture behavioural of controller is
 	
-	type controller_state is	(state_r, state_reset_read,
+	type controller_state is	(state_r, --state_reset_read,
 					 state_s_write,										
 					 state_gl_d, state_gl_d_2,							
 					 state_gr_d, state_gr_d_2, 							
 					 state_f_write, state_f_read, state_gl, state_sl, state_gr, state_sr,
-					 state_u_turn, state_u_turn_2, state_u_turn_final	
+					 state_u_turn, state_u_turn_2, state_u_turn_final,
+					 
+					 state_pause_com_mine, state_pause_com_crossing, state_pause_com_www
+
+				
 );											
 	
 	type crossing_state is		(state_ptc, --state patch to crossing
@@ -73,8 +77,9 @@ begin
 		end if;
 	end process;
 	
-
-	process (sensor_l, sensor_m, sensor_r, crossing)
+	
+--FSM voor cross counting
+	process (sensor_l, sensor_m, sensor_r, crossing, state_p)  --nieuwe element in sensitivity list (state_p)
 	begin
 		case state_p is
 			
@@ -87,7 +92,7 @@ begin
 						new_state_p 	<=	state_ptc;
 					end if;		
 
-			when state_crossing => 	crossing <= '1';
+			when state_crossing => 	crossing <= '0';
 					
 					if (sensor_l = '0' and sensor_m = '0' and sensor_r = '0') then
 						new_state_p 	<=	state_crossing;
@@ -105,7 +110,7 @@ begin
 						new_state_p 	<=	state_ctp;
 					end if;
 			
-			when state_patch => 	crossing <= '0';
+			when state_patch => 	crossing <= '1';
 					
 					if (sensor_l = '0' and sensor_m = '0' and sensor_r = '0') then
 						new_state_p 	<=	state_patch;
@@ -115,6 +120,8 @@ begin
 					end if;	
 		end case;
 	end process;
+--Eind FSM crosscounting
+
 
 	process (sensor_l, sensor_m, sensor_r, count_in, state, data_in, data_ready, mine_s)
 	begin 
@@ -132,47 +139,57 @@ begin
 
 					data_out <= "00000000";
 					
-				if (data_ready = '1') then
-					new_state <= state_reset_read;
-				else 
+				--if (data_ready = '1') then
+				--	new_state <= state_reset_read;
+				--else 
+				--	new_state <= state_r;
+				--end if;
+				
+				
+				
+				if (sensor_l = '1' and sensor_m = '0' and sensor_r = '1') then
+					new_state <= state_f_read;
+					
+				else
 					new_state <= state_r;
 				end if;
+					
+					
 
-
-
-		when state_reset_read=>		count_reset <= '1';							
-						motor_l_reset <= '1';
-						motor_r_reset <= '1';
+	--	when state_reset_read=>		count_reset <= '1';							
+					--	motor_l_reset <= '1';
+					--	motor_r_reset <= '1';
 	
-						motor_l_direction <= '0';
-						motor_r_direction <= '0';
+					--	motor_l_direction <= '0';
+						--motor_r_direction <= '0';
 
-						write_data <= '0';
-						read_data <= '1';
+						--write_data <= '0';
+					--	read_data <= '1';
 	
-						data_out <= "00000000";
+						--data_out <= "00000000";
 
-					if (data_in = "00000001") then			
-						new_state <= state_gl_d;
+				--if (data_in = "00000001") then			
+						--new_state <= state_gl_d;
 
-					elsif (data_in = "00000010") then
-						new_state <= state_gr_d;
+					--elsif (data_in = "00000010") then
+					--	new_state <= state_gr_d;
 
-					elsif (data_in = "00000011") then
-						new_state <= state_f_write;
+					--elsif (data_in = "00000011") then
+					--	new_state <= state_f_write;
 
-					elsif (data_in = "00000100") then
-						new_state <= state_s_write;
+					--elsif (data_in = "00000100") then
+						--new_state <= state_s_write;
+
 
 					-- No need for extra statement to go to u turn here, and probably no need for stop but leave it!!
 					-- since you never abruptly go to u-turn from reset.
 					
 					--elsif (data_in = "00000101") then
-					--	new_state <= state_u_turn;
+						--new_state <= state_u_turn;
 						
-					else
-						new_state <= state_r;
-					end if;
+					--else
+					--	new_state <= state_r;
+					--end if;
 
 
 --new cases
@@ -192,7 +209,7 @@ begin
 						read_data		<= '0';
 
 					
-	                   			new_state <= state_s_write;        -- end state, you never leave this, because ifyou come here you are finished with challenge.
+	               new_state <= state_s_write;        -- end state, you never leave this, because ifyou come here you are finished with challenge.
 							
 				
 
@@ -295,26 +312,113 @@ begin
 					write_data <= '1';
 					read_data <= '0';
 					
-					
-					if (mine_s = '1') then
-						data_out 		<= "00000100";
-					elsif (crossing = '1') then
-						data_out		<= "00000010";
-					elsif (sensor_l = '1' and sensor_m = '1' and sensor_r = '1') then
-						data_out		<= "00000011";
-					else 
-						data_out		<= "00000000";
-					end if;
+			--oude stuk
+				--	if (mine_s = '1') then
+					--	data_out 		<= "00000100";
+				--	elsif (crossing = '1') then
+					--	data_out		<= "00000010";
+				--	elsif (sensor_l = '1' and sensor_m = '1' and sensor_r = '1') then
+					--	data_out		<= "00000011";
+				--	else 
+					--	data_out		<= "00000000";
+				--	end if;
 								
 
+				--if (unsigned(count_in) < to_unsigned(1000000, 20)) then
+				--	new_state <= state_f_write;
+				
+				--elsif (unsigned(count_in) >= to_unsigned(1000000, 20)) then
+					--new_state <= state_f_read;
+				--end if;
+			--eind oude stuk
+		
+		
+			--Nieuw stukje om 80 keer communicatie te solven	
 				if (unsigned(count_in) < to_unsigned(1000000, 20)) then
 					new_state <= state_f_write;
+					data_out <= "00000000";
 				
 				elsif (unsigned(count_in) >= to_unsigned(1000000, 20)) then
-					new_state <= state_f_read;
+					if (mine_s = '1') then
+						data_out 		<= "00000100";
+						new_state		<= state_pause_com_mine;
+					elsif (crossing = '1') then
+						data_out		<= "00000010";
+						new_state		<= state_pause_com_crossing;
+					elsif (sensor_l = '1' and sensor_m = '1' and sensor_r = '1') then
+						data_out		<= "00000011";
+						new_state		<= state_pause_com_www;
+					else 
+						data_out		<= "00000000";
+						new_state	<= state_f_read;
+					end if;
 				end if;
 		
-		
+		when state_pause_com_mine =>	count_reset <= '1';							
+												motor_l_reset <= '1';
+												motor_r_reset <= '1';
+
+												motor_l_direction <= '0';
+												motor_r_direction <= '0';
+
+												write_data <= '0';
+												read_data <= '0';
+
+												data_out <= "00000000";
+						
+											new_state <= state_u_turn;
+											
+					
+		when state_pause_com_crossing => count_reset <= '0';
+													motor_l_reset <= '0';
+													motor_r_reset <= '0';
+
+													motor_l_direction <= '1';
+													motor_r_direction <= '0';
+
+													write_data <= '0';
+													read_data <= '1';
+
+													data_out <= "00000000";
+												
+												if (data_ready = '1') then
+													if (data_in = "00000001") then			
+														new_state <= state_gl_d;
+
+													elsif (data_in = "00000010") then
+														new_state <= state_gr_d;
+
+													elsif (data_in = "00000011") then
+														new_state <= state_f_read;
+													end if;
+												else
+													new_state <= state_f_read;
+												end if;
+													
+	
+		when state_pause_com_www	=> 	count_reset <= '1';							
+													motor_l_reset <= '1';
+													motor_r_reset <= '1';
+
+													motor_l_direction <= '0';
+													motor_r_direction <= '0';
+
+													write_data <= '0';
+													read_data <= '1';
+
+													data_out <= "00000000";
+												
+												if (data_ready = '1') then	
+													if (data_in = "00000100") then
+														new_state <= state_s_write;
+													elsif (data_in = "00000101") then           
+														new_state <= state_u_turn;
+													end if;
+												else
+													new_state <= state_f_read;
+												end if;
+																									
+		-- eind nieuw stukje
 
 		when state_f_read =>	count_reset <= '0';
 					motor_l_reset <= '0';
@@ -329,45 +433,45 @@ begin
 					read_data <= '1';
 
 				if (unsigned(count_in) >= to_unsigned(1000000, 20)) then
-					if (mine_s = '1') then
-						new_state <= state_u_turn;
+					--if (mine_s = '1') then
+						--new_state <= state_u_turn;
 
-					elsif (data_ready = '1') then
-						if (data_in = "00000001") then			
-							new_state <= state_gl_d;
+					--elsif (data_ready = '1') then
+						--if (data_in = "00000001") then			
+					--		new_state <= state_gl_d;
 
-						elsif (data_in = "00000010") then
-							new_state <= state_gr_d;
+					--	elsif (data_in = "00000010") then
+						--	new_state <= state_gr_d;
 
-						elsif (data_in = "00000011") then
-							new_state <= state_f_write;
+						--elsif (data_in = "00000011") then
+							--new_state <= state_f_write;
 
-						elsif (data_in = "00000100") then
-							new_state <= state_s_write;
+						--elsif (data_in = "00000100") then
+							--new_state <= state_s_write;
 						
-						elsif (data_in = "00000101" or mine_s = '1') then           
-							new_state <= state_u_turn;
+						--elsif (data_in = "00000101" or mine_s = '1') then           
+							--new_state <= state_u_turn;
 
-						end if;
+						--end if;
+						
+						if (data_ready = '0') then
+							if (sensor_l = '0' and sensor_m = '0' and sensor_r = '1') then
+								new_state <= state_gl;
 
-					elsif (data_ready = '0') then
-						if (sensor_l = '0' and sensor_m = '0' and sensor_r = '1') then
-							new_state <= state_gl;
+							elsif (sensor_l = '0' and sensor_m = '1' and sensor_r = '1') then
+								new_state <= state_sl;
 
-						elsif (sensor_l = '0' and sensor_m = '1' and sensor_r = '1') then
-							new_state <= state_sl;
+							elsif (sensor_l = '1' and sensor_m = '0' and sensor_r = '0') then
+								new_state <= state_gr;
 
-						elsif (sensor_l = '1' and sensor_m = '0' and sensor_r = '0') then
-							new_state <= state_gr;
+							elsif (sensor_l = '1' and sensor_m = '1' and sensor_r = '0') then
+								new_state <= state_sr;
 
-						elsif (sensor_l = '1' and sensor_m = '1' and sensor_r = '0') then
-							new_state <= state_sr;
-
-						else 														 
-							new_state <= state_f_write;			
+							else 														 
+								new_state <= state_f_write;			
 														
+							end if;
 						end if;
-					end if;
 				else
 				new_state <= state_f_read;
 			end if;
