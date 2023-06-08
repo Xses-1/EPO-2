@@ -153,7 +153,7 @@ begin
 
 
 --Process for communication
-	process (state_com, left_signal, right_signal, u_turn_signal, stop_signal, forward_signal)
+	process (state_com, mine_s, crossing, sensor_l, sensor_m, sensor_r, data_ready, data_in) --I'm not sure about data_ready and in.
 	begin
 		case state_com is
 
