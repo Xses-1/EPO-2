@@ -244,7 +244,8 @@ begin
 
 
 --Process for motors
-	process (sensor_l, sensor_m, sensor_r, count_in, state, data_in, data_ready, mine_s)
+	process (sensor_l, sensor_m, sensor_r, count_in, state, data_in, data_ready, mine_s,
+		left_signal, right_signal, stop_signal, forward_signal, u_turn_signal) -- added the left, right, stop forward, uturn signals.
 	begin 
 		case state is
 
