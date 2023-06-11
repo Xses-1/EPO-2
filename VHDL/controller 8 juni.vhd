@@ -44,7 +44,7 @@ architecture behavioural of controller is
 					 state_gl_d, state_gl_d_2,							
 					 state_gr_d, state_gr_d_2, 							
 					 state_f, state_gl, state_sl, state_gr, state_sr,
-					 state_u_turn, state_u_turn_2   --state_u_turn_final, weggehaald zie explanation helemaal onder.		
+					 state_u_turn, state_u_turn_2 --, state_u_turn_delay   --state_u_turn_final, weggehaald zie explanation helemaal onder.		
 );											
 	
 	type crossing_state is		(state_ptc, --state patch to crossing
@@ -246,7 +246,7 @@ begin
 
 --Process for motors
 	process (sensor_l, sensor_m, sensor_r, count_in, state, mine_s, --data_in, data_ready,      --I don't think these two should be here (Not read anywhere in this process)
-		left_signal, right_signal, stop_signal, forward_signal, u_turn_signal) -- added the left, right, stop forward, uturn signals.
+		left_signal, right_signal, stop_signal, forward_signal, u_turn_signal, count_com) -- added the left, right, stop forward, uturn signals.
 	begin 
 		case state is
 
@@ -455,6 +455,25 @@ begin
 	
 
 --u-turn branch implented as two sharp right states, we turn sharp right until we see lmr = 101 again. 
+-- If the simple uturn is not consistent enough the following backupstate can be uncommented. It works 
+		--when state_u_turn_delay =>	
+					--count_reset <= '0';		
+					--motor_l_reset <= '0';
+					--motor_r_reset <= '0';
+
+					--motor_l_direction <= '1';
+					--motor_r_direction <= '0';		
+
+					--data_out	  <= "00000000";
+
+					--write_data <= '0';
+					--read_data <= '0';
+					
+				--if (unsigned(count_com) >= to_unsigned(18000000, 30)) then
+					--new_state <= state_u_turn;
+				--else 
+					--new_state <= state_u_turn_delay;
+				--end if;	
 
 		when state_u_turn =>	count_reset <= '0';		
 					motor_l_reset <= '0';
