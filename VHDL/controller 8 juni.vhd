@@ -189,7 +189,7 @@ begin
 							data_out <= "00000100";  --Mine detected
 						elsif (crossing = '1') then
 							data_out <= "00000010";  -- at crossing
-						elsif (sensor_l = '0' and sensor_m = '0' and sensor_r = '0') then
+						elsif (sensor_l = '1' and sensor_m = '1' and sensor_r = '1') then --Pieter: lmr = 000 aangepast naar lmr = 111
 							data_out <= "00000011"; -- at dead end
 						end if;
 						
@@ -403,7 +403,7 @@ begin
 					motor_l_direction	<= '0';
 					motor_r_direction	<= '0'; 
 
-				if (sensor_l = '1' and sensor_m = '1' and sensor_r = '1') then
+				if (sensor_l = '0' and sensor_m = '0' and sensor_r = '0') then	-- Pieter: lmr = 111 veranderd naar lmr = 000 want black = 0 denkk
 					new_state <= state_gl_d_2;
 				else 
 					new_state <= state_gl_d;
@@ -414,7 +414,7 @@ begin
 					motor_l_reset		<= '1';
 					motor_r_reset		<= '0';
 					motor_l_direction	<= '0';
-					motor_r_direction	<= '0'; 
+					motor_r_direction	<= '0';
 					
 				if (sensor_l = '1' and sensor_m = '0' and sensor_r = '1') then   -- since we turn at cross section, 
 					new_state <= state_f;					-- we don't test for 011 anymore but rather 101
@@ -432,7 +432,7 @@ begin
 					motor_l_direction <= '1';
 					motor_r_direction <= '0';
 				
-				if (sensor_l = '1' and sensor_m = '1' and sensor_r = '1') then
+				if (sensor_l = '0' and sensor_m = '0' and sensor_r = '0') then	--Pieter: Zelfde als bij gl_d
 					new_state <= state_gr_d_2;
 				else 
 					new_state <= state_gr_d;
