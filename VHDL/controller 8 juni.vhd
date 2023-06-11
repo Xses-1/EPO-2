@@ -44,7 +44,7 @@ architecture behavioural of controller is
 					 state_gl_d, state_gl_d_2,							
 					 state_gr_d, state_gr_d_2, 							
 					 state_f, state_gl, state_sl, state_gr, state_sr,
-					 state_u_turn, state_u_turn_2 --, state_u_turn_delay   --state_u_turn_final, weggehaald zie explanation helemaal onder.		
+					 state_u_turn, state_u_turn_2   --state_u_turn_final, weggehaald zie explanation helemaal onder.		
 );											
 	
 	type crossing_state is		(state_ptc, --state patch to crossing
@@ -189,7 +189,7 @@ begin
 							data_out <= "00000100";  --Mine detected
 						elsif (crossing = '1') then
 							data_out <= "00000010";  -- at crossing
-						elsif (sensor_l = '1' and sensor_m = '1' and sensor_r = '1') then --Pieter: lmr = 000 aangepast naar lmr = 111
+						elsif (sensor_l = '0' and sensor_m = '0' and sensor_r = '0') then
 							data_out <= "00000011"; -- at dead end
 						end if;
 						
@@ -246,7 +246,7 @@ begin
 
 --Process for motors
 	process (sensor_l, sensor_m, sensor_r, count_in, state, mine_s, --data_in, data_ready,      --I don't think these two should be here (Not read anywhere in this process)
-		left_signal, right_signal, stop_signal, forward_signal, u_turn_signal, count_com) -- added the left, right, stop forward, uturn signals.
+		left_signal, right_signal, stop_signal, forward_signal, u_turn_signal) -- added the left, right, stop forward, uturn signals.
 	begin 
 		case state is
 
@@ -403,7 +403,7 @@ begin
 					motor_l_direction	<= '0';
 					motor_r_direction	<= '0'; 
 
-				if (sensor_l = '0' and sensor_m = '0' and sensor_r = '0') then	-- Pieter: lmr = 111 veranderd naar lmr = 000 want black = 0 denkk
+				if (sensor_l = '1' and sensor_m = '1' and sensor_r = '1') then
 					new_state <= state_gl_d_2;
 				else 
 					new_state <= state_gl_d;
@@ -414,7 +414,7 @@ begin
 					motor_l_reset		<= '1';
 					motor_r_reset		<= '0';
 					motor_l_direction	<= '0';
-					motor_r_direction	<= '0';
+					motor_r_direction	<= '0'; 
 					
 				if (sensor_l = '1' and sensor_m = '0' and sensor_r = '1') then   -- since we turn at cross section, 
 					new_state <= state_f;					-- we don't test for 011 anymore but rather 101
@@ -432,7 +432,7 @@ begin
 					motor_l_direction <= '1';
 					motor_r_direction <= '0';
 				
-				if (sensor_l = '0' and sensor_m = '0' and sensor_r = '0') then	--Pieter: Zelfde als bij gl_d
+				if (sensor_l = '1' and sensor_m = '1' and sensor_r = '1') then
 					new_state <= state_gr_d_2;
 				else 
 					new_state <= state_gr_d;
@@ -455,25 +455,6 @@ begin
 	
 
 --u-turn branch implented as two sharp right states, we turn sharp right until we see lmr = 101 again. 
--- If the simple uturn is not consistent enough the following backupstate can be uncommented. It works 
-		--when state_u_turn_delay =>	
-					--count_reset <= '0';		
-					--motor_l_reset <= '0';
-					--motor_r_reset <= '0';
-
-					--motor_l_direction <= '1';
-					--motor_r_direction <= '0';		
-
-					--data_out	  <= "00000000";
-
-					--write_data <= '0';
-					--read_data <= '0';
-					
-				--if (unsigned(count_com) >= to_unsigned(18000000, 30)) then
-					--new_state <= state_u_turn;
-				--else 
-					--new_state <= state_u_turn_delay;
-				--end if;	
 
 		when state_u_turn =>	count_reset <= '0';		
 					motor_l_reset <= '0';
