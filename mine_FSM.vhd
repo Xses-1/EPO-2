@@ -57,7 +57,7 @@ begin
 			when compare_state =>
 				mine_out <= '0';
 				new_count <= count;
-				if (count > 2650) then
+				if (count > 2269) then
 					next_state <= detected_state;
 				else
 					next_state <= reset_state;
