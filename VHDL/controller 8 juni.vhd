@@ -19,7 +19,6 @@ entity controller is
 		data_ready		: in	std_logic;
 		mine_s			: in	std_logic;
 
-
 --new outputs
 		data_out		: out	std_logic_vector (7 downto 0);	
 		write_data		: out	std_logic;
@@ -32,6 +31,7 @@ entity controller is
 
 		motor_r_reset		: out	std_logic;
 		motor_r_direction	: out	std_logic
+	
 		
 	);
 
@@ -41,8 +41,8 @@ architecture behavioural of controller is
 	
 	type controller_state is	(state_r,
 					 state_s,										
-					 state_gl_d, state_gl_d_2,							
-					 state_gr_d, state_gr_d_2, 							
+					 state_sl_d, state_gl_d_2,							
+					 state_sr_d, state_gr_d_2, 							
 					 state_f, state_gl, state_sl, state_gr, state_sr,
 					 state_u_turn, state_u_turn_2   --state_u_turn_final, weggehaald zie explanation helemaal onder.		
 );											
@@ -56,7 +56,7 @@ architecture behavioural of controller is
 
 	type communication_state is	(state_com_r, 
 					 state_com_write,
-					 state_com_wait,
+					 state_com_wait, state_com_wait_2,
 					 state_com_read
 );
 
@@ -66,7 +66,7 @@ architecture behavioural of controller is
 	signal state_com, new_state_com: communication_state;
 	signal crossing: std_logic;
 	signal left_signal, right_signal, stop_signal, forward_signal, u_turn_signal: std_logic;
-	signal count_com, new_count_com : unsigned (26 downto 0);
+	signal count_turn, new_count_turn : unsigned (27 downto 0);
 
 begin
 	process (clk)
@@ -76,6 +76,7 @@ begin
 				state	<= state_r;
 				state_p <= state_ptc;
 				state_com <= state_com_r;
+				
 			else
 				state 	<= new_state;
 				state_p	<= new_state_p;
@@ -91,17 +92,17 @@ begin
  	begin
  		if ( clk'event and clk ='1' ) then
 			if (reset = '1') then
- 				count_com <= ( others => '0');
+ 				count_turn <= ( others => '0');
  			else
- 				count_com <= new_count_com;
+ 				count_turn <= new_count_turn;
  			end if;
  		end if;
  	end process;
 
- 	process ( count_com )
+ 	process ( count_turn )
  	begin
 
-		new_count_com <= count_com + 1;
+		new_count_turn <= count_turn + 1;
 
  	end process;
 --Eind counters
@@ -153,84 +154,105 @@ begin
 
 
 --Process for communication
-	process (state_com, mine_s, crossing, sensor_l, sensor_m, sensor_r, data_ready) --data_in) --I'm not sure about data_ready and in.
-	begin											--I dont think data_in should be here.	
+	process (state_com, mine_s, crossing, sensor_l, sensor_m, sensor_r, data_ready, data_in, count_turn)
+	begin		
+		left_signal <= '0';
+		right_signal <= '0';
+		stop_signal <= '0';
+		u_turn_signal <= '0';
+		forward_signal<= '0';
+		
 		case state_com is
 
-			when state_com_r =>	write_data <= '0';
+			when state_com_r =>	
 						read_data <= '0';
 						data_out <= "00000000";
+						write_data <= '0';
 					
-						left_signal <= '0';
-						right_signal <= '0';
-						stop_signal <= '0';
-						u_turn_signal <= '0';
-						forward_signal<= '0';
+					if (mine_s = '1') then
+						new_state_com <= state_com_write;
+				
+					elsif (crossing = '1') then
+						new_state_com <= state_com_write;
 					
-					if (mine_s = '1' or crossing = '1' or (sensor_l = '1' and sensor_m = '1' and sensor_r = '1')) then -- No sending after u-turn anymore,
-																	   --Thijs doesn't really NEED to know if we done with a u-turn.
-							new_state_com <= state_com_write;
-						else
-							new_state_com <= state_com_r;
-						end if;
+					elsif ((sensor_l = '1' and sensor_m = '1' and sensor_r = '1')) then
+						new_state_com <= state_com_write;
+					
+					else
+						new_state_com <= state_com_r;
+					end if;
+			
 
-											
-			when state_com_write =>		write_data <= '1';
+			when state_com_write =>		
 							read_data <= '0';
+							write_data <= '1';
 							new_state_com <= state_com_wait;
-					
-							left_signal <= '0';
-							right_signal <= '0';
-							stop_signal <= '0';
-							u_turn_signal <= '0';
-							forward_signal<= '0';
-
+							
 						if (mine_s = '1') then
 							data_out <= "00000100";  --Mine detected
 						elsif (crossing = '1') then
 							data_out <= "00000010";  -- at crossing
 						elsif (sensor_l = '0' and sensor_m = '0' and sensor_r = '0') then
 							data_out <= "00000011"; -- at dead end
+						else
+							data_out <= "00000000";
 						end if;
 						
-													
 			when state_com_wait	=>
 							write_data <= '0';
 							read_data <= '0';
 
 							data_out <= "00000000";
-							
-						left_signal <= '0';
-						right_signal <= '0';
-						stop_signal <= '0';
-						u_turn_signal <= '0';
-						forward_signal<= '0';
-						
-						if (data_ready = '1') then
-							new_state_com <= state_com_read;
+											
+						if (data_ready = '0') then
+							new_state_com <= state_com_wait_2;
 						else
 							new_state_com <= state_com_wait;
+						end if;
+				
+			when state_com_wait_2	=>
+							write_data <= '0';
+							read_data <= '0';
+
+							data_out <= "00000000";
+
+						if ((data_ready = '1')) then 				
+							new_state_com <= state_com_read;
+						else
+							new_state_com <= state_com_wait_2;
 						end if;
 
 			when state_com_read	=>
 							write_data <= '0';
-							read_data <= '1';
-							
 							data_out <= "00000000";
+							read_data<= '1';
 							
 						if (data_in = "00000001") then
-							left_signal <= '1';     
+							left_signal <= '1';			
+							
 						elsif (data_in = "00000010") then
 							right_signal <= '1';
+		
 						elsif (data_in = "00000011") then
-							forward_signal <= '1';
+							forward_signal<= '1';
+	
+							
 						elsif (data_in = "00000100") then
 							stop_signal <= '1';
+					
+							
 						elsif (data_in = "00000101") then
 							u_turn_signal <= '1';
+			
+						else						
+							left_signal <= '0';
+							right_signal <= '0';
+							stop_signal <= '0';
+							u_turn_signal <= '0';
+							forward_signal<= '0';
 						end if;
 						
-						if (mine_s = '0' or crossing = '0' or (sensor_l = '0' or sensor_m = '0' or sensor_r = '0')) then
+						if (mine_s = '0' or crossing = '0' or (sensor_l = '1' and sensor_m = '0' and sensor_r = '1')) then
 							new_state_com <= state_com_r;
 						else
 							new_state_com <= state_com_read;
@@ -242,11 +264,9 @@ begin
 --End process for communication
 
 
-
-
 --Process for motors
 	process (sensor_l, sensor_m, sensor_r, count_in, state, mine_s, --data_in, data_ready,      --I don't think these two should be here (Not read anywhere in this process)
-		left_signal, right_signal, stop_signal, forward_signal, u_turn_signal) -- added the left, right, stop forward, uturn signals.
+		left_signal, right_signal, stop_signal, forward_signal, u_turn_signal, count_turn) -- added the left, right, stop forward, uturn signals.
 	begin 
 		case state is
 
@@ -257,7 +277,7 @@ begin
 					motor_l_direction <= '0';
 					motor_r_direction <= '0';
 
-				if (sensor_l = '1' and sensor_m = '0' and sensor_r = '1') then    -- this part makes the robot start working without initializing.
+				if (sensor_l = '1' and sensor_m = '0' and sensor_r = '1') then    -- this part makes the robot start working without initializing signal coming in from uart.
 					new_state <= state_f;
 					
 				else
@@ -274,10 +294,10 @@ begin
 					motor_r_direction <= '0';
 						
 				if (left_signal = '1') then
-					new_state <= state_gl_d;
+					new_state <= state_sl_d;
 
 				elsif (right_signal = '1') then
-					new_state <= state_gr_d;
+					new_state <= state_sr_d;
 
 				elsif (stop_signal = '1') then
 					new_state <= state_s;
@@ -298,8 +318,6 @@ begin
 
 				elsif (sensor_l = '0' and sensor_m = '1' and sensor_r = '1') then
 					new_state <= state_sl;
-
-
 
 				elsif (sensor_l = '1' and sensor_m = '0' and sensor_r = '0') then
 					new_state <= state_gr;
@@ -396,17 +414,17 @@ begin
 
 -- left branch door data van thijs, bestaande uit state_gl_d, state_gl_d_2      We need to make sure the robot turns early enough so lmr = 110 when we encounter the line again.
 		
-		when state_gl_d =>	count_reset		<= '0';
-					motor_l_reset		<= '1';
+		when state_sl_d =>	count_reset		<= '0';
+					motor_l_reset		<= '0';
 					motor_r_reset		<= '0';
 
 					motor_l_direction	<= '0';
 					motor_r_direction	<= '0'; 
 
-				if (sensor_l = '1' and sensor_m = '1' and sensor_r = '1') then
+				if ((sensor_l = '1' and sensor_m = '1' and sensor_r = '1') and (unsigned(count_turn) < to_unsigned(50000000, 27))) then
 					new_state <= state_gl_d_2;
 				else 
-					new_state <= state_gl_d;
+					new_state <= state_sl_d;
 				end if;
 		
 
@@ -416,26 +434,26 @@ begin
 					motor_l_direction	<= '0';
 					motor_r_direction	<= '0'; 
 					
-				if (sensor_l = '1' and sensor_m = '0' and sensor_r = '1') then   -- since we turn at cross section, 
-					new_state <= state_f;					-- we don't test for 011 anymore but rather 101
+				if (sensor_l = '1' and sensor_m = '0' and sensor_r = '1') then   -- go back when we see the line again 
+					new_state <= state_f;					
 				else 
 					new_state <= state_gl_d_2;
 				end if;
 
 
 -- right branch door data van thijs, bestaande uit state_gr_d, state_gr_d_2
-		when state_gr_d  => 
+		when state_sr_d  => 
  					count_reset <= '0';
 					motor_l_reset <= '0';
-					motor_r_reset <= '1';
+					motor_r_reset <= '0';
 
 					motor_l_direction <= '1';
-					motor_r_direction <= '0';
+					motor_r_direction <= '1';
 				
-				if (sensor_l = '1' and sensor_m = '1' and sensor_r = '1') then
+				if ((sensor_l = '1' and sensor_m = '1' and sensor_r = '1') and (unsigned(count_turn) < to_unsigned(50000000, 27))) then
 					new_state <= state_gr_d_2;
 				else 
-					new_state <= state_gr_d;
+					new_state <= state_sr_d;
 				end if;
 
 
@@ -478,29 +496,10 @@ begin
 					motor_r_direction <= '1';		
 					
 				if ((sensor_l = '1' and sensor_m = '0' and sensor_r = '1') or (sensor_l = '0' and sensor_m = '0' and sensor_r = '0') ) then
-					--new_state <= state_u_turn_final;
 					new_state <= state_f;
 				else 
 					new_state <= state_u_turn_2;
 				end if;
-	
-	--We don't really need u turn final state anymore, since this was implemented due to communication issues.	
-
-	--when state_u_turn_final =>	count_reset <= '0';		
-					--motor_l_reset <= '0';
-					--motor_r_reset <= '0';
-
-					--motor_l_direction <= '1';
-					--motor_r_direction <= '0';		
-
-					
-				--if (unsigned(count_in) < to_unsigned(1000000, 20)) then
-					--new_state <= state_u_turn_final;
-					
-				---elsif (unsigned(count_in) >= to_unsigned(1000000, 20)) then
-					--new_state <= state_f;
-
-				--end if;
 
 		end case;
 	end process;
