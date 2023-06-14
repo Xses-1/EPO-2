@@ -41,8 +41,8 @@ architecture behavioural of controller is
 	
 	type controller_state is	(state_r,
 					 state_s,										
-					 state_sl_d, state_gl_d_2,							
-					 state_sr_d, state_gr_d_2, 							
+					 state_gl_d, state_sl_d_2,							
+					 state_gr_d, state_sr_d_2, 							
 					 state_f, state_gl, state_sl, state_gr, state_sr,
 					 state_u_turn, state_u_turn_2   --state_u_turn_final, weggehaald zie explanation helemaal onder.		
 );											
@@ -294,10 +294,10 @@ begin
 					motor_r_direction <= '0';
 						
 				if (left_signal = '1') then
-					new_state <= state_sl_d;
+					new_state <= state_gl_d;
 
 				elsif (right_signal = '1') then
-					new_state <= state_sr_d;
+					new_state <= state_gr_d;
 
 				elsif (stop_signal = '1') then
 					new_state <= state_s;
@@ -414,22 +414,22 @@ begin
 
 -- left branch door data van thijs, bestaande uit state_gl_d, state_gl_d_2      We need to make sure the robot turns early enough so lmr = 110 when we encounter the line again.
 		
-		when state_sl_d =>	count_reset		<= '0';
-					motor_l_reset		<= '0';
+		when state_gl_d =>	count_reset		<= '0';
+					motor_l_reset		<= '1';
 					motor_r_reset		<= '0';
 
 					motor_l_direction	<= '0';
 					motor_r_direction	<= '0'; 
 
-				if ((sensor_l = '1' and sensor_m = '1' and sensor_r = '1') and (unsigned(count_turn) < to_unsigned(50000000, 27))) then
-					new_state <= state_gl_d_2;
+				if ((sensor_l = '1' and sensor_m = '1' and sensor_r = '1')) then
+					new_state <= state_sl_d_2;
 				else 
-					new_state <= state_sl_d;
+					new_state <= state_gl_d;
 				end if;
 		
 
-		when state_gl_d_2 =>	count_reset		<= '0';
-					motor_l_reset		<= '1';
+		when state_sl_d_2 =>	count_reset		<= '0';
+					motor_l_reset		<= '0';
 					motor_r_reset		<= '0';
 					motor_l_direction	<= '0';
 					motor_r_direction	<= '0'; 
@@ -437,38 +437,38 @@ begin
 				if (sensor_l = '1' and sensor_m = '0' and sensor_r = '1') then   -- go back when we see the line again 
 					new_state <= state_f;					
 				else 
-					new_state <= state_gl_d_2;
+					new_state <= state_sl_d_2;
 				end if;
 
 
 -- right branch door data van thijs, bestaande uit state_gr_d, state_gr_d_2
-		when state_sr_d  => 
+		when state_gr_d  => 
  					count_reset <= '0';
-					motor_l_reset <= '0';
-					motor_r_reset <= '0';
-
-					motor_l_direction <= '1';
-					motor_r_direction <= '1';
-				
-				if ((sensor_l = '1' and sensor_m = '1' and sensor_r = '1') and (unsigned(count_turn) < to_unsigned(50000000, 27))) then
-					new_state <= state_gr_d_2;
-				else 
-					new_state <= state_sr_d;
-				end if;
-
-
-		when state_gr_d_2  => 
-					count_reset <= '0';
 					motor_l_reset <= '0';
 					motor_r_reset <= '1';
 
 					motor_l_direction <= '1';
 					motor_r_direction <= '0';
 				
+				if ((sensor_l = '1' and sensor_m = '1' and sensor_r = '1')) then
+					new_state <= state_sr_d_2;
+				else 
+					new_state <= state_gr_d;
+				end if;
+
+
+		when state_sr_d_2  => 
+					count_reset <= '0';
+					motor_l_reset <= '0';
+					motor_r_reset <= '1';
+
+					motor_l_direction <= '1';
+					motor_r_direction <= '1';
+				
 				if (sensor_l = '1' and sensor_m = '0' and sensor_r = '1') then  -- same comment as state_gl_d_2.
 					new_state <= state_f;
 				else 
-					new_state <= state_gr_d_2;
+					new_state <= state_sr_d_2;
 				end if;
 	
 
