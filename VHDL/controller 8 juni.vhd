@@ -460,7 +460,7 @@ begin
 		when state_sr_d_2  => 
 					count_reset <= '0';
 					motor_l_reset <= '0';
-					motor_r_reset <= '1';
+					motor_r_reset <= '0';
 
 					motor_l_direction <= '1';
 					motor_r_direction <= '1';
