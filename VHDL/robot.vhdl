@@ -20,13 +20,13 @@ entity robot is
 		motor_l_pwm     : out   std_logic;
 		motor_r_pwm     : out   std_logic;
 		
-		led_7 : out std_logic;
-		led_6 : out std_logic;
-		led_5 : out std_logic;
-		led_4 : out std_logic;
-		led_3 : out std_logic;
-		led_2 : out std_logic;
-		led_1 : out std_logic;
+		--led_7 : out std_logic;
+		--led_6 : out std_logic;
+		--led_5 : out std_logic;
+		--led_4 : out std_logic;
+		--led_3 : out std_logic;
+		--led_2 : out std_logic;
+		--led_1 : out std_logic;
 		led_0 : out std_logic
 	
 	);
@@ -125,7 +125,8 @@ end component uart;
 component mine_sensor_top is
 	port (	clk		: in std_logic;
 		mine_sensor_in	: in std_logic;
-		mine_out	: out std_logic
+		mine_out	: out std_logic;
+		led_0 		: out std_logic
 	);
 end component mine_sensor_top;
 
@@ -155,7 +156,8 @@ LB1: inputbuffer port map(	clk		=>	clk,
 
 M1: mine_sensor_top port map (	clk		=>	clk,
 				mine_sensor_in	=> 	sensor_mine_in,
-				mine_out 	=> 	mine_out_signal);
+				mine_out 	=> 	mine_out_signal,
+				led_0				=> led_0);
 
 
 U1:	uart port map(
