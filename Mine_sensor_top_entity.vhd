@@ -5,7 +5,8 @@ use IEEE.numeric_std.all;
 entity mine_sensor_top is
 	port (	clk		: in std_logic;
 		mine_sensor_in	: in std_logic;
-		mine_out	: out std_logic
+		mine_out	: out std_logic;
+		led_0		: out std_logic
 	);
 end entity mine_sensor_top;
 
@@ -14,7 +15,8 @@ architecture structural of mine_sensor_top is
 		port (	clk	: in std_logic;
 			reset 	: in std_logic;
 			sensor	: in std_logic;
-			mine_out: out std_logic
+			mine_out: out std_logic;
+			led_0	: out std_logic
 		);
 	end component mine_sensor;
 
@@ -32,7 +34,8 @@ begin
 	mine_detector	: mine_sensor port map (	clk		=>	clk,
 							reset		=>	mine_reset_signal,
 							sensor		=>	mine_sensor_in,
-							mine_out	=>	mine_out_signal
+							mine_out	=>	mine_out_signal,
+							led_0		=> 	led_0
 						);
 
 	count		: mine_counter port map	(	clk		=>	clk,
