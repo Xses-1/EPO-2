@@ -24,8 +24,8 @@ entity timebase is
  				count <= ( others => '0');
 				reset_out <= '1';				-- Added reset_out signal.
  			else
-				reset_out <= '0'; 
  				count <= new_count;
+				reset_out <= '0';
  			end if;
  		end if;
  	end process;
