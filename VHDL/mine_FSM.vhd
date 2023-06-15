@@ -7,7 +7,8 @@ entity mine_sensor is
 	port (	clk		: in  std_logic;
 		reset		: in  std_logic;
 		sensor		: in  std_logic;
-		mine_out	: out std_logic
+		mine_out	: out std_logic;
+		led_0 : out std_logic
 	);
 end entity mine_sensor;
 
@@ -16,8 +17,7 @@ architecture behavioural of mine_sensor is
 type sensor_states is (reset_state, count_state, compare_state, detected_state);
 
 signal count, new_count: unsigned (11 downto 0) := to_unsigned(0,12);
-signal state : sensor_states := reset_state;
-signal next_state : sensor_states := reset_state;
+signal state, next_state : sensor_states;
 begin
 	process(clk)
 		begin
@@ -37,6 +37,7 @@ begin
 		case state is
 			when reset_state =>
 				mine_out <= '0';
+				led_0 <=	'0';
 				new_count <= (others => '0');
 
 				if (sensor = '1') then
@@ -47,6 +48,7 @@ begin
 
 			when count_state =>
 				mine_out <= '0';
+				led_0 <=	'0';
 				if (sensor = '0') then
 					new_count <= count + 1;
 					next_state <= count_state;
@@ -57,6 +59,7 @@ begin
 
 			when compare_state =>
 				mine_out <= '0';
+				led_0 <=	'0';
 				new_count <= count;
 				if (count > 2222) then
 					next_state <= detected_state;
@@ -67,6 +70,7 @@ begin
 
 			when detected_state =>
 				mine_out <= '1';
+				led_0 <=	'1';
 				new_count <= count;
 				next_state <= detected_state;	
 
