@@ -35,7 +35,7 @@ begin
 	end process;
 
 
-	process (direction, count_in, state)
+	process (direction, count_in, state, reset)
 	begin
 		case state is
 
@@ -45,6 +45,8 @@ begin
 				else
 					new_state <= state0;
 				end if;
+				
+			
 
 			when state1 => pwm <= '1';
 				if (direction ='0' and unsigned(count_in) >= to_unsigned(50000, 20)) then
@@ -56,10 +58,12 @@ begin
 				else
 					new_state <= state1;
 				end if;
+				
 
 
 			when state2 => pwm <='0';
 				new_state <= state2;
+
 
 		end case;
 	end process;
