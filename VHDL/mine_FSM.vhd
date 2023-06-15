@@ -16,7 +16,8 @@ architecture behavioural of mine_sensor is
 type sensor_states is (reset_state, count_state, compare_state, detected_state);
 
 signal count, new_count: unsigned (11 downto 0) := to_unsigned(0,12);
-signal state, next_state : sensor_states;
+signal state : sensor_states := reset_state;
+signal next_state : sensor_states := reset_state;
 begin
 	process(clk)
 		begin
@@ -57,7 +58,7 @@ begin
 			when compare_state =>
 				mine_out <= '0';
 				new_count <= count;
-				if (count > 2600) then
+				if (count > 2222) then
 					next_state <= detected_state;
 				else
 					next_state <= reset_state;
