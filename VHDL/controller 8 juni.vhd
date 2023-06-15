@@ -123,7 +123,7 @@ begin
 						new_state_p 	<=	state_ptc;
 					end if;		
 
-			when state_crossing => 	crossing <= '0';
+			when state_crossing => 	crossing <= '1';
 					
 					if (sensor_l = '0' and sensor_m = '0' and sensor_r = '0') then
 						new_state_p 	<=	state_crossing;
@@ -140,7 +140,7 @@ begin
 						new_state_p 	<=	state_ctp;
 					end if;
 			
-			when state_patch => 	crossing <= '1';
+			when state_patch => 	crossing <= '0';
 					
 					if (sensor_l = '0' and sensor_m = '0' and sensor_r = '0') then
 						new_state_p 	<=	state_patch;
